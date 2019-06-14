@@ -1,0 +1,43 @@
+<mat-card>
+  <mat-form-field>
+    <mat-select
+      placeholder="Seleccione pais"
+      name="pais"
+      ngModel
+      #pais="ngModel"
+      matNativeControl
+    >
+      <mat-option
+        (onSelectionChange)="obtenerCiudades(pais['b:Id'])"
+        *ngFor="let pais of paises"
+        [value]='pais["b:Nombre"]'
+      >
+        {{ pais["b:Nombre"] }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <br />
+  <mat-form-field>
+    <mat-select
+    name="ciudad"
+    ngModel
+    #ciudad="ngModel"
+    matNativeControl
+    placeholder="Seleccione Ciudad"
+    >
+      <mat-option *ngFor="let ciudad of ciudades" [value]='ciudad["b:Nombre"]'>
+        {{ ciudad["b:Nombre"] }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <br />
+  <mat-form-field>
+    <input matInput placeholder="Ingrese fecha retiro" />
+  </mat-form-field>
+  <br />
+  <mat-form-field>
+    <input matInput placeholder="Ingrese fecha devolucion" />
+  </mat-form-field>
+  <br />
+  <button mat-raised-button color="primary">Buscar</button>
+</mat-card>

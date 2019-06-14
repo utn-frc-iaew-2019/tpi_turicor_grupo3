@@ -1,24 +1,20 @@
 const express = require("express");
 //const bodyParser = require('body-parser');
 //const parser = require('xml2json-light');
-const parser = require('fast-xml-parser');
+const parser = require("fast-xml-parser");
+var jsonxml = require("jsontoxml");
 
 const app = express();
 
-const soapRequest = require('easy-soap-request');
-const fs = require('fs');
+const soapRequest = require("easy-soap-request");
+const fs = require("fs");
 
-const url = 'http://rubenromero-001-site1.itempurl.com/WCFReservaVehiculos.svc/basic';
-const headers = {
+//Credenciales
+//user: grupo_nro3
+//pass: wGcs2tsBe5
 
-"Content-Type": "text/xml;charset=UTF-8",
-"SOAPAction": "http://tempuri.org/IWCFReservaVehiculos/ConsultarPaises",
-"Host": "rubenromero-001-site1.itempurl.com",
-"User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
-
-};
-
-const xml = fs.readFileSync('C:/Users/Administrador/Documents/TPI IAEW/tpiaew/backend/test.xml', 'utf-8');
+const url =
+  "http://rubenromero-001-site1.itempurl.com/WCFReservaVehiculos.svc/basic";
 
 //app.use(bodyParser.xml());
 
@@ -37,32 +33,104 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/paises", (req, res, next) => {
+  const headers = {
+    "Content-Type": "text/xml;charset=UTF-8",
+    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ConsultarPaises",
+    Host: "rubenromero-001-site1.itempurl.com",
+    "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
+  };
 
+  const xml = fs.readFileSync(
+    "C:/Users/Administrador/Downloads/UTN/Repo IAEW/tpi_turicor_grupo3/tpiaew/backend/test.xml",
+    "utf-8"
+  );
 
-
-(async () => {
+  (async () => {
     try {
       console.log("Intentando");
       const { response } = await soapRequest(url, headers, xml, 1000);
       const { body } = response;
       //console.log("Test parser nuevo: "+parser.xml2json(body));
       const parseado = parser.parse(body);
-      console.log(parseado["s:Envelope"]["s:Body"]
-      .ConsultarPaisesResponse
-      .ConsultarPaisesResult["a:Paises"]["b:PaisEntity"]);
-      // console.log("Body: " + body);
+
+      console.log(
+        parseado["s:Envelope"]["s:Body"].ConsultarPaisesResponse
+          .ConsultarPaisesResult["a:Paises"]["b:PaisEntity"]
+      );
+      const paisesvector =
+        parseado["s:Envelope"]["s:Body"].ConsultarPaisesResponse
+          .ConsultarPaisesResult["a:Paises"]["b:PaisEntity"];
+
+      res.status(200).json({
+        paises: paisesvector
+      });
     } catch (e) {
       // Test promise rejection for coverage
       console.log(e);
     }
   })();
+});
 
-//   const { response } = soapRequest(url, headers, xml, 1000);
-//   const { body } = response;
+app.get("/ciudades", (req, res, next) => {
+  const headers = {
+    "Content-Type": "text/xml;charset=UTF-8",
+    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ConsultarCiudades",
+    Host: "rubenromero-001-site1.itempurl.com",
+    "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
+  };
 
-//   parser.parseString(body, function (err, result) {
-//     console.log("Body parser xml2js "+result);
-// });
+  const idPais = req.query.idPais;
 
+  const requestBodySoap = {
+    "soapenv:Body": {
+      "tem:ConsultarCiudades": {
+        "tem:ConsultarCiudadesRequest": { "wcf:IdPais": "" }
+      }
+    }
+  };
+
+  requestBodySoap["soapenv:Body"]["tem:ConsultarCiudades"][
+    "tem:ConsultarCiudadesRequest"
+  ]["wcf:IdPais"] = idPais;
+
+  const xmlbody = jsonxml(requestBodySoap);
+
+  const primeraParteXML =
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
+  xmlns:tem="http://tempuri.org/"
+  xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
+ <soapenv:Header>
+    <Credentials>
+       <ser:UserName>grupo_nro3</ser:UserName>
+       <ser:Password>wGcs2tsBe5</ser:Password>
+    </Credentials>
+ </soapenv:Header>`;
+
+  const ultimaParteXML = `</soapenv:Envelope>`;
+
+  const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
+
+  (async () => {
+    try {
+      const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
+      const { body } = response;
+
+      const parseado = parser.parse(body);
+      // console.dir(parseado);
+      const ciudadesvector =
+        parseado["s:Envelope"]["s:Body"].ConsultarCiudadesResponse
+          .ConsultarCiudadesResult["a:Ciudades"]["b:CiudadEntity"];
+
+      res.status(200).json({
+        ciudades: ciudadesvector
+      });
+    } catch (e) {
+      // Test promise rejection for coverage
+      console.log(e);
+    }
+  })();
+});
 
 module.exports = app;
