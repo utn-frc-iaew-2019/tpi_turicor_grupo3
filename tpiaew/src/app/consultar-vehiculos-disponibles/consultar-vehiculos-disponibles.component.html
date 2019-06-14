@@ -1,43 +1,146 @@
 <mat-card>
-  <mat-form-field>
-    <mat-select
-      placeholder="Seleccione pais"
-      name="pais"
-      ngModel
-      #pais="ngModel"
-      matNativeControl
-    >
-      <mat-option
-        (onSelectionChange)="obtenerCiudades(pais['b:Id'])"
-        *ngFor="let pais of paises"
-        [value]='pais["b:Nombre"]'
+  <form #form="ngForm" (submit)="onBuscar(form)">
+    <mat-form-field>
+      <mat-select
+        placeholder="Seleccione pais"
+        name="pais"
+        ngModel
+        #pais="ngModel"
+        matNativeControl
       >
-        {{ pais["b:Nombre"] }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <br />
-  <mat-form-field>
-    <mat-select
-    name="ciudad"
-    ngModel
-    #ciudad="ngModel"
-    matNativeControl
-    placeholder="Seleccione Ciudad"
-    >
-      <mat-option *ngFor="let ciudad of ciudades" [value]='ciudad["b:Nombre"]'>
-        {{ ciudad["b:Nombre"] }}
-      </mat-option>
-    </mat-select>
-  </mat-form-field>
-  <br />
-  <mat-form-field>
-    <input matInput placeholder="Ingrese fecha retiro" />
-  </mat-form-field>
-  <br />
-  <mat-form-field>
-    <input matInput placeholder="Ingrese fecha devolucion" />
-  </mat-form-field>
-  <br />
-  <button mat-raised-button color="primary">Buscar</button>
+        <mat-option
+          (onSelectionChange)="obtenerCiudades(pais['b:Id'])"
+          *ngFor="let pais of paises"
+          [value]="pais['b:Nombre']"
+        >
+          {{ pais["b:Nombre"] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <mat-select
+        name="ciudad"
+        ngModel
+        #ciudad="ngModel"
+        matNativeControl
+        placeholder="Seleccione Ciudad"
+      >
+        <mat-option
+          *ngFor="let ciudad of ciudades"
+          [value]="ciudad['b:Nombre']"
+        >
+          {{ ciudad["b:Nombre"] }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <input
+        name="fechaRetiro"
+        ngModel
+        #fechaRetiro="ngModel"
+        matInput
+        placeholder="Ingrese fecha retiro"
+      />
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <input
+        name="fechaDevolucion"
+        ngModel
+        #fechaDevolucion="ngModel"
+        matInput
+        placeholder="Ingrese fecha devolucion"
+      />
+    </mat-form-field>
+    <br />
+    <button type="submit" mat-raised-button color="primary">Buscar</button>
+  </form>
+</mat-card>
+
+<mat-card *ngIf="vehiculos.length > 0">
+  <table mat-table [dataSource]="vehiculos" class="mat-elevation-z8">
+    <ng-container matColumnDef="CantidadDisponible">
+      <th mat-header-cell *matHeaderCellDef>Cantidad Disponible</th>
+      <td mat-cell *matCellDef="let vehiculo">
+        {{ vehiculos["a:CantidadDisponible"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="CantidadPuertas">
+      <th mat-header-cell *matHeaderCellDef>CantidadPuertas</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:CantidadPuertas"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="CiudadId">
+      <th mat-header-cell *matHeaderCellDef>CiudadId</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:CiudadId"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Id">
+      <th mat-header-cell *matHeaderCellDef>Id</th>
+      <td mat-cell *matCellDef="let vehiculos">{{ vehiculos["a:Id"] }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="Marca">
+      <th mat-header-cell *matHeaderCellDef>Marca</th>
+      <td mat-cell *matCellDef="let vehiculos">{{ vehiculos["a:Marca"] }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="Modelo">
+      <th mat-header-cell *matHeaderCellDef>Modelo</th>
+      <td mat-cell *matCellDef="let vehiculos">{{ vehiculos["a:Modelo"] }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="PrecioPorDia">
+      <th mat-header-cell *matHeaderCellDef>PrecioPorDia</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:PrecioPorDia"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="Puntaje">
+      <th mat-header-cell *matHeaderCellDef>Puntaje</th>
+      <td mat-cell *matCellDef="let vehiculos">{{ vehiculos["a:Puntaje"] }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="TieneAireAcon">
+      <th mat-header-cell *matHeaderCellDef>TieneAireAcon</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:TieneAireAcon"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="TieneDireccion">
+      <th mat-header-cell *matHeaderCellDef>TieneDireccion</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:TieneDireccion"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="TipoCambio">
+      <th mat-header-cell *matHeaderCellDef>TipoCambio</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:TipoCambio"] }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="VehiculoCiudadId">
+      <th mat-header-cell *matHeaderCellDef>VehiculoCiudadId</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos["a:VehiculoCiudadId"] }}
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</mat-card>
+<mat-card *ngIf="vehiculos.length <= 0">
+  <p>No se encontraron vehiculos</p>
 </mat-card>

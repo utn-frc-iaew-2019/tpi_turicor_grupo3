@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ServicioSoapService } from '../serviciosoap.service';
 import { Pais } from '../paises.model';
 import { Subscription } from 'rxjs';
+import { NgForm } from '@angular/forms';
+import { Ciudad } from '../ciudades.model';
+import { Vehiculo } from '../vehiculos.model';
 
 @Component({
   selector: 'app-consultar-vehiculos-disponibles',
@@ -11,9 +14,24 @@ import { Subscription } from 'rxjs';
 export class ConsultarVehiculosDisponiblesComponent implements OnInit {
 
   paises: Pais[]= [];
-  ciudadesFiltradas;
-  ciudades;
+  vehiculos: Vehiculo[]= [];
+  ciudades: Ciudad[]=[];
   suscripcion: Subscription;
+  displayedColumns: string[] = [
+    "CantidadDisponible",
+     "CantidadPuertas",
+     "CiudadId",
+     "Id",
+     "Marca",
+     "Modelo",
+     "PrecioPorDia",
+     "Puntaje",
+     "TieneAireAcon",
+     "TieneDireccion",
+     "TipoCambio",
+     "VehiculoCiudadId"
+      ];
+
   constructor(public servicio: ServicioSoapService) { }
 
 
@@ -34,5 +52,16 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
       .subscribe(ciudadesActualizadas => {
         this.ciudades = ciudadesActualizadas;
       });
+  }
+
+  onBuscar(form: NgForm){
+    const ciudadFiltrada=this.ciudades.find(ciudad => ciudad["b:Nombre"] ==form.value.ciudad);
+    this.servicio.getVehiculosDisponibles(ciudadFiltrada["b:Id"],form.value.fechaRetiro,form.value.fechaDevolucion);
+    this.suscripcion = this.servicio
+      .getVehiculosListener()
+      .subscribe(vehiculosActualizados => {
+        this.vehiculos = vehiculosActualizados;
+      });
+      console.dir(this.vehiculos);
   }
 }

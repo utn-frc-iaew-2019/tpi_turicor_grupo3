@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { Pais } from './paises.model';
 import { Ciudad } from './ciudades.model';
+import { Vehiculo } from './vehiculos.model';
 
 @Injectable ({
   providedIn: 'root'
@@ -12,6 +13,8 @@ export class ServicioSoapService {
   paisesActualizados = new Subject<Pais[]>();
   ciudades: Ciudad[]= [];
   ciudadesActualizadas = new Subject<Ciudad[]>();
+  vehiculos: Vehiculo[]= [];
+  vehiculosActualizados = new Subject<Vehiculo[]>();
 
   constructor(public http: HttpClient) {}
 
@@ -38,10 +41,27 @@ export class ServicioSoapService {
       if(response.ciudades instanceof Array){
         this.ciudades = response.ciudades;
       }else{
-        this.ciudades= [response.ciudades]
+        this.ciudades= [response.ciudades];
       }
       this.ciudadesActualizadas.next([...this.ciudades]);
     });
   }
 
+  getVehiculosListener(){
+    return this.vehiculosActualizados.asObservable();
+  }
+
+  getVehiculosDisponibles(idCiudad: string, fechaRetiro: string, fechaDevolucion: string){
+    let params = new HttpParams().set("idCiudad", idCiudad).set("fechaRetiro", fechaRetiro).set("fechaDevolucion", fechaDevolucion);
+    this.http.get<{vehiculos: Vehiculo[]}>('http://localhost:3000/vehiculosDisponibles',{params:params})
+    .subscribe((response) => {
+      if(response.vehiculos instanceof Array){
+        this.vehiculos = response.vehiculos;
+      }else{
+        this.vehiculos= [response.vehiculos];
+      }
+      this.vehiculos.forEach(vehiculo => vehiculo["a:PrecioPorDia"]=vehiculo["a:PrecioPorDia"] * 1.2);
+      this.vehiculosActualizados.next([...this.vehiculos]);
+    });
+  }
 }

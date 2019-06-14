@@ -133,4 +133,77 @@ app.get("/ciudades", (req, res, next) => {
   })();
 });
 
+app.get("/vehiculosDisponibles", (req, res, next) =>{
+  const headers = {
+    "Content-Type": "text/xml;charset=UTF-8",
+    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ConsultarVehiculosDisponibles",
+    Host: "rubenromero-001-site1.itempurl.com",
+    "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
+  };
+
+  const idCiudad= req.query.idCiudad;
+  const fechaRetiro= req.query.fechaRetiro;
+  const fechaDevolucion= req.query.fechaDevolucion;
+
+  const primeraParteXML =
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
+  xmlns:tem="http://tempuri.org/"
+  xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
+ <soapenv:Header>
+    <Credentials>
+       <ser:UserName>grupo_nro3</ser:UserName>
+       <ser:Password>wGcs2tsBe5</ser:Password>
+    </Credentials>
+ </soapenv:Header>`;
+
+  const ultimaParteXML = `</soapenv:Envelope>`;
+
+  const requestBodySoap = {
+    "soapenv:Body": {
+    "tem:ConsultarVehiculosDisponibles": {
+      "tem:ConsultarVehiculosRequest": {
+        "wcf:IdCiudad": "",
+        "wcf:FechaHoraRetiro": "",
+        "wcf:FechaHoraDevolucion": ""
+      }
+    }
+  }
+};
+
+requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+  "tem:ConsultarVehiculosRequest"
+]["wcf:IdCiudad"] = idCiudad;
+requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+  "tem:ConsultarVehiculosRequest"
+]["wcf:FechaHoraRetiro"] = fechaRetiro;
+requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+  "tem:ConsultarVehiculosRequest"
+]["wcf:FechaHoraDevolucion"] = fechaDevolucion;
+
+const xmlbody = jsonxml(requestBodySoap);
+
+const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
+
+  (async () => {
+    try {
+      const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
+      const { body } = response;
+
+      const parseado = parser.parse(body);
+
+      const vehiculosvector =
+        parseado["s:Envelope"]["s:Body"].ConsultarVehiculosDisponiblesResponse
+        .ConsultarVehiculosDisponiblesResult["a:VehiculosEncontrados"]["a:VehiculoModel"];
+
+      res.status(200).json({
+        vehiculos: vehiculosvector
+      });
+    } catch (e) {
+      // Test promise rejection for coverage
+      console.log(e);
+    }
+  })();
+});
+
 module.exports = app;
