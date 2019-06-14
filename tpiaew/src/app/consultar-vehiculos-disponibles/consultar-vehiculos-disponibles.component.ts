@@ -29,7 +29,8 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
      "TieneAireAcon",
      "TieneDireccion",
      "TipoCambio",
-     "VehiculoCiudadId"
+     "VehiculoCiudadId",
+     "Reservar"
       ];
 
   constructor(public servicio: ServicioSoapService) { }
@@ -63,5 +64,9 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
         this.vehiculos = vehiculosActualizados;
       });
       console.dir(this.vehiculos);
+  }
+
+  onReservar(row){
+
   }
 }
