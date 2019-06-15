@@ -1,5 +1,5 @@
 const express = require("express");
-//const bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 //const parser = require('xml2json-light');
 const parser = require("fast-xml-parser");
 var jsonxml = require("jsontoxml");
@@ -16,7 +16,7 @@ const fs = require("fs");
 const url =
   "http://rubenromero-001-site1.itempurl.com/WCFReservaVehiculos.svc/basic";
 
-//app.use(bodyParser.xml());
+app.use(bodyParser.json());
 
 //app.use(xmlparser());
 
@@ -33,6 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
+//Obtener paises
 app.get("/paises", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
@@ -51,13 +52,8 @@ app.get("/paises", (req, res, next) => {
       console.log("Intentando");
       const { response } = await soapRequest(url, headers, xml, 1000);
       const { body } = response;
-      //console.log("Test parser nuevo: "+parser.xml2json(body));
       const parseado = parser.parse(body);
 
-      console.log(
-        parseado["s:Envelope"]["s:Body"].ConsultarPaisesResponse
-          .ConsultarPaisesResult["a:Paises"]["b:PaisEntity"]
-      );
       const paisesvector =
         parseado["s:Envelope"]["s:Body"].ConsultarPaisesResponse
           .ConsultarPaisesResult["a:Paises"]["b:PaisEntity"];
@@ -72,6 +68,7 @@ app.get("/paises", (req, res, next) => {
   })();
 });
 
+//Obtener ciudades
 app.get("/ciudades", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
@@ -133,6 +130,7 @@ app.get("/ciudades", (req, res, next) => {
   })();
 });
 
+//Consultar vehiculos disponibles
 app.get("/vehiculosDisponibles", (req, res, next) =>{
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
@@ -198,6 +196,99 @@ const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
 
       res.status(200).json({
         vehiculos: vehiculosvector
+      });
+    } catch (e) {
+      // Test promise rejection for coverage
+      console.log(e);
+    }
+  })();
+});
+
+app.post("/reservar",(req, res, next) => {
+
+  const headers = {
+    "Content-Type": "text/xml;charset=UTF-8",
+    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ReservarVehiculo",
+    Host: "rubenromero-001-site1.itempurl.com",
+    "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
+  };
+
+  const primeraParteXML =
+  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
+  xmlns:tem="http://tempuri.org/"
+  xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
+ <soapenv:Header>
+    <Credentials>
+       <ser:UserName>grupo_nro3</ser:UserName>
+       <ser:Password>wGcs2tsBe5</ser:Password>
+    </Credentials>
+ </soapenv:Header>`;
+
+  const ultimaParteXML = `</soapenv:Envelope>`;
+
+  const requestBodySoap= {"soapenv:Body": {
+    "tem:ReservarVehiculo": {
+      "tem:ReservarVehiculoRequest": {
+        "wcf:ApellidoNombreCliente": "", // string
+        "wcf:FechaHoraDevolucion": "", // Tipo: Datetime
+        "wcf:FechaHoraRetiro": "", // Tipo:Datetime
+        "wcf:IdVehiculoCiudad": "", // Tipo: number
+        "wcf:LugarDevolucion": "", // Tipo: LugarDevolucion
+        "wcf:LugarRetiro": "", // Tipo: LugarRetiro
+        "wcf:NroDocumentoCliente": "" // Tipo: number
+      }
+    }
+  }}
+
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:ApellidoNombreCliente"] = req.body.apellidoNombre;
+  // console.log("Nombre cliente" + req.body.apellidoNombre);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:FechaHoraDevolucion"] = req.body.fechaDevolucion;
+  // console.log("fechaDevolucion " + req.body.fechaDevolucion);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:FechaHoraRetiro"] = req.body.fechaRetiro;
+  // console.log("fechaRetiro " + req.body.fechaRetiro);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:IdVehiculoCiudad"] = req.body.idVehiculoCiudad;
+  // console.log("fechaRetiro " + req.body.idVehiculoCiudad);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:LugarDevolucion"] = req.body.lugarDevolucion;
+  // console.log("fechaRetiro " + req.body.lugarDevolucion);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:LugarRetiro"] = req.body.lugarRetiro;
+  // console.log("fechaRetiro " + req.body.lugarRetiro);
+  requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
+    "tem:ReservarVehiculoRequest"
+  ]["wcf:NroDocumentoCliente"] = req.body.nroDocumento;
+  // console.log("fechaRetiro " + req.body.nroDocumento);
+
+  const xmlbody = jsonxml(requestBodySoap);
+
+  const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
+  // console.log(xmlSOAP);
+
+  (async () => {
+    try {
+      const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
+      const { body } = response;
+
+      const parseado = parser.parse(body);
+
+      const datosReserva =
+        parseado["s:Envelope"]["s:Body"].ReservarVehiculoResponse
+        .ReservarVehiculoResult["a:Reserva"];
+
+      console.dir(datosReserva);
+      res.status(200).json({
+        respuesta: datosReserva
       });
     } catch (e) {
       // Test promise rejection for coverage

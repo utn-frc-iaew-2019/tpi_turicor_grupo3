@@ -14,11 +14,13 @@ import { MatInputModule,
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ConsultarVehiculosDisponiblesComponent
+    ConsultarVehiculosDisponiblesComponent,
+    ReservarVehiculoComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,84 @@
+<mat-card>
+  <form #form="ngForm" (submit)="onReserva(form)">
+      <mat-form-field>
+          <input
+            name="apellidoNombre"
+            ngModel
+            #apellidoNombre="ngModel"
+            matInput
+            placeholder="Ingrese apellido y nombre"
+          />
+      </mat-form-field>
+      <br />
+      <mat-form-field>
+          <input
+            name="fechaDevolucion"
+            ngModel
+            #fechaDevolucion="ngModel"
+            matInput
+            placeholder="Ingrese fecha devolucion"
+          />
+        </mat-form-field>
+        <br />
+      <mat-form-field>
+        <input
+          name="fechaRetiro"
+          ngModel
+          #fechaRetiro="ngModel"
+          matInput
+          placeholder="Ingrese fecha retiro"
+        />
+      </mat-form-field>
+      <br />
+      <mat-card>Id Vehiculo Ciudad: {{idVehiculoCiudad}}</mat-card>
+
+        <br />
+    <mat-form-field>
+      <mat-select
+        placeholder="Seleccione Lugar de Devolucion"
+        name="lugarDevolucion"
+        ngModel
+        #lugarDevolucion="ngModel"
+        matNativeControl
+      >
+        <mat-option value="Aeropuerto">Aeropuerto</mat-option>
+        <mat-option value="TerminalBuses">Terminal de Buses</mat-option>
+        <mat-option value="Hotel">Hotel</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+      <mat-select
+        placeholder="Seleccione Lugar de Retiro"
+        name="lugarRetiro"
+        ngModel
+        #lugarRetiro="ngModel"
+        matNativeControl
+      >
+      <mat-option value="Aeropuerto">Aeropuerto</mat-option>
+      <mat-option value="TerminalBuses">Terminal de Buses</mat-option>
+      <mat-option value="Hotel">Hotel</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <br />
+    <mat-form-field>
+        <input
+          name="nroDocumento"
+          ngModel
+          #nroDocumento="ngModel"
+          matInput
+          placeholder="Ingrese numero de documento"
+        />
+      </mat-form-field>
+    <br />
+
+    <button type="submit" mat-raised-button color="primary">Reservar</button>
+  </form>
+</mat-card>
+<mat-card *ngIf="hayReserva">
+  <p>Codigo Reserva {{detalleReserva["b:CodigoReserva"]}}</p>
+  <p>Fecha Reserva {{detalleReserva["b:FechaReserva"]}}</p>
+  <p>Id Cliente ---</p>
+  <p>Costo ---</p>
+  <p>Precio de venta ---</p>
+</mat-card>

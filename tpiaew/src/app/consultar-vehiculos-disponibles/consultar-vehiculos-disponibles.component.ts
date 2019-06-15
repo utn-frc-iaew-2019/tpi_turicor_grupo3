@@ -66,7 +66,7 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
       console.dir(this.vehiculos);
   }
 
-  onReservar(row){
-
+  envioIdVehiculo(row){
+    this.servicio.setIdVehiculoCiudad(row["a:VehiculoCiudadId"]);
   }
 }

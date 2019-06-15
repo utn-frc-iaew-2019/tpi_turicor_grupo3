@@ -61,9 +61,10 @@
 
 <mat-card *ngIf="vehiculos.length > 0">
   <table mat-table [dataSource]="vehiculos" class="mat-elevation-z8">
+
     <ng-container matColumnDef="CantidadDisponible">
       <th mat-header-cell *matHeaderCellDef>Cantidad Disponible</th>
-      <td mat-cell *matCellDef="let vehiculo">
+      <td mat-cell *matCellDef="let vehiculos">
         {{ vehiculos["a:CantidadDisponible"] }}
       </td>
     </ng-container>
@@ -140,7 +141,7 @@
     <ng-container matColumnDef="Reservar">
         <th mat-header-cell *matHeaderCellDef> Reservar </th>
         <td mat-cell *matCellDef="let row">
-          <button mat-raised-button color="primary" (click)="onReservar(row)" > Visualizar </button>
+          <button mat-raised-button color="primary" (click)="envioIdVehiculo(row)" routerLink="/reserva" routerLinkActive="router-link-active"  > Resevar </button>
         </td>
     </ng-container>
 
