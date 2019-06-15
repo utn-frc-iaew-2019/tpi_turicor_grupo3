@@ -351,7 +351,7 @@ app.post("/registrar-reserva", (req, res, next) => {
 
   reserva.save().then(()=> {
     res.status(201).json({
-      message: "Reserva registrado correctamente!"
+      message: "Reserva registrada correctamente!"
     });
   });;
 });
