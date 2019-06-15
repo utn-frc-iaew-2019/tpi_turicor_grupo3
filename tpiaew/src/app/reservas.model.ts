@@ -1,5 +1,3 @@
-import { VehiculoPorCiudad } from "./vehiculoPorCiudad.model";
-
 export interface Reserva {
   "b:ApellidoNombreCliente": string;
   "b:CodigoReserva": string;
@@ -15,7 +13,6 @@ export interface Reserva {
   "b:TotalReserva": number;
   "b:UsuarioCancelacion": any; //Esta en null
   "b:UsuarioReserva": string;
-  // "b:VehiculoPorCiudadEntity": VehiculoPorCiudad,
   "b:VehiculoPorCiudadEntity": {
     "a:CantidadDisponible": number;
     "b:CiudadEntity": string; //Esta en null
@@ -35,4 +32,5 @@ export interface Reserva {
     "b:VehiculoId": number;
   };
   "b:VehiculoPorCiudadId": number;
+  precioDeVenta: number;
 }

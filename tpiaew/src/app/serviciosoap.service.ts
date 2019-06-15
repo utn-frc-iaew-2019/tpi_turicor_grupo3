@@ -1,81 +1,104 @@
-import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Subject } from 'rxjs';
-import { Pais } from './paises.model';
-import { Ciudad } from './ciudades.model';
-import { Vehiculo } from './vehiculos.model';
-import { Reserva } from './reservas.model';
+import { Injectable } from "@angular/core";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { Subject } from "rxjs";
+import { Pais } from "./paises.model";
+import { Ciudad } from "./ciudades.model";
+import { Vehiculo } from "./vehiculos.model";
+import { Reserva } from "./reservas.model";
+import { ReservaMongo } from './reserva-mongo.model';
 
-@Injectable ({
-  providedIn: 'root'
+@Injectable({
+  providedIn: "root"
 })
 export class ServicioSoapService {
-  paises: Pais[]= [];
+  paises: Pais[] = [];
   paisesActualizados = new Subject<Pais[]>();
-  ciudades: Ciudad[]= [];
+  ciudades: Ciudad[] = [];
   ciudadesActualizadas = new Subject<Ciudad[]>();
-  vehiculos: Vehiculo[]= [];
+  vehiculos: Vehiculo[] = [];
   vehiculosActualizados = new Subject<Vehiculo[]>();
   reserva: Reserva;
-  reservaActualizada= new Subject<Reserva>();
+  reservaActualizada = new Subject<Reserva>();
   idVehiculoCiudad: number;
-  idVehiculoCiudadActualizado= new Subject<number>();
+  idVehiculoCiudadActualizado = new Subject<number>();
 
   constructor(public http: HttpClient) {}
 
-  getPaisesListener(){
+  getPaisesListener() {
     return this.paisesActualizados.asObservable();
   }
 
   getPaises() {
-    this.http.get<{paises: Pais[]}>('http://localhost:3000/paises')
-    .subscribe((response) => {
-      this.paises = response.paises;
-      this.paisesActualizados.next([...this.paises]);
-    });
+    this.http
+      .get<{ paises: Pais[] }>("http://localhost:3000/paises")
+      .subscribe(response => {
+        this.paises = response.paises;
+        this.paisesActualizados.next([...this.paises]);
+      });
   }
 
-  getCiudadesListener(){
+  getCiudadesListener() {
     return this.ciudadesActualizadas.asObservable();
   }
 
-  getCiudades(idPais:string) {
+  getCiudades(idPais: string) {
     let params = new HttpParams().set("idPais", idPais);
-    this.http.get<{ciudades: Ciudad[]}>('http://localhost:3000/ciudades',{params:params})
-    .subscribe((response) => {
-      if(response.ciudades instanceof Array){
-        this.ciudades = response.ciudades;
-      }else{
-        this.ciudades= [response.ciudades];
-      }
-      this.ciudadesActualizadas.next([...this.ciudades]);
-    });
+    this.http
+      .get<{ ciudades: Ciudad[] }>("http://localhost:3000/ciudades", {
+        params: params
+      })
+      .subscribe(response => {
+        if (response.ciudades instanceof Array) {
+          this.ciudades = response.ciudades;
+        } else {
+          this.ciudades = [response.ciudades];
+        }
+        this.ciudadesActualizadas.next([...this.ciudades]);
+      });
   }
 
-  getVehiculosListener(){
+  getVehiculosListener() {
     return this.vehiculosActualizados.asObservable();
   }
 
-  getVehiculosDisponibles(idCiudad: string, fechaRetiro: string, fechaDevolucion: string){
-    let params = new HttpParams().set("idCiudad", idCiudad).set("fechaRetiro", fechaRetiro).set("fechaDevolucion", fechaDevolucion);
-    this.http.get<{vehiculos: Vehiculo[]}>('http://localhost:3000/vehiculosDisponibles',{params:params})
-    .subscribe((response) => {
-      if(response.vehiculos instanceof Array){
-        this.vehiculos = response.vehiculos;
-      }else{
-        this.vehiculos= [response.vehiculos];
-      }
-      this.vehiculosActualizados.next([...this.vehiculos]);
-    });
+  getVehiculosDisponibles(
+    idCiudad: string,
+    fechaRetiro: string,
+    fechaDevolucion: string
+  ) {
+    let params = new HttpParams()
+      .set("idCiudad", idCiudad)
+      .set("fechaRetiro", fechaRetiro)
+      .set("fechaDevolucion", fechaDevolucion);
+    this.http
+      .get<{ vehiculos: Vehiculo[] }>(
+        "http://localhost:3000/vehiculosDisponibles",
+        { params: params }
+      )
+      .subscribe(response => {
+        if (response.vehiculos instanceof Array) {
+          this.vehiculos = response.vehiculos;
+        } else {
+          this.vehiculos = [response.vehiculos];
+        }
+        this.vehiculosActualizados.next([...this.vehiculos]);
+      });
   }
 
-  getReservaListener(){
+  getReservaListener() {
     return this.reservaActualizada.asObservable();
   }
 
-  reservarVehiculo(apellidoNombre: string, fechaDevolucion: string, fechaRetiro: string,
-    idVehiculoCiudad: number, lugarDevolucion: string, lugarRetiro: string, nroDocumento: number){
-    const payload ={
+  reservarVehiculo(
+    apellidoNombre: string,
+    fechaDevolucion: string,
+    fechaRetiro: string,
+    idVehiculoCiudad: number,
+    lugarDevolucion: string,
+    lugarRetiro: string,
+    nroDocumento: number
+  ) {
+    const payload = {
       apellidoNombre,
       fechaDevolucion,
       fechaRetiro,
@@ -83,19 +106,28 @@ export class ServicioSoapService {
       lugarDevolucion,
       lugarRetiro,
       nroDocumento
-      }
-      this.http.post<{respuesta: Reserva}>('http://localhost:3000/reservar',payload)
-    .subscribe((response) => {
-      this.reserva = response.respuesta;
-      this.reservaActualizada.next(this.reserva);
-    });
+    };
+    this.http
+      .post<{ respuesta: Reserva }>("http://localhost:3000/reservar", payload)
+      .subscribe(response => {
+        this.reserva = response.respuesta;
+        this.reservaActualizada.next(this.reserva);
+        //Creamos la reserva que vamos a guardar en nuestra base MongoDB
+        var reservamongo: ReservaMongo;
+        reservamongo.codigoReserva = this.reserva["b:CodigoReserva"];
+        reservamongo.fechaReserva = this.reserva["b:FechaReserva"];
+        reservamongo.idCliente = 1; //#completar
+        reservamongo.costo = this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"]["b:PrecioPorDia"];
+        reservamongo.precioVenta = this.reserva.precioDeVenta;
+        this.http.post("http://localhost:3000/registrar-reserva", reservamongo);
+      });
   }
 
-  getIdVehiculoCiudad(){
+  getIdVehiculoCiudad() {
     return this.idVehiculoCiudad;
   }
 
-  setIdVehiculoCiudad(idVehiculoCiudad: number){
-    this.idVehiculoCiudad=idVehiculoCiudad;
+  setIdVehiculoCiudad(idVehiculoCiudad: number) {
+    this.idVehiculoCiudad = idVehiculoCiudad;
   }
 }

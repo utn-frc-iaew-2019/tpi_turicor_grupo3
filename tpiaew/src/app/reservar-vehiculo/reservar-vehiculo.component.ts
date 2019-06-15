@@ -33,9 +33,7 @@ export class ReservarVehiculoComponent implements OnInit {
       form.value.nroDocumento);
     this.servicio.getReservaListener().subscribe(detalleReserva =>{
         this.hayReserva=true;
-        // console.dir(detalleReserva);
         this.detalleReserva=detalleReserva;
       });
-    //Aca se deberia guardar el detalle de la reserva en nuestra bd
   }
 }

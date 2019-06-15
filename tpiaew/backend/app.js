@@ -1,13 +1,26 @@
 const express = require("express");
-const bodyParser = require('body-parser');
+const mongoose = require("mongoose");
+const Reserva = require("./models/reserva");
+const bodyParser = require("body-parser");
 const parser = require("fast-xml-parser");
 var jsonxml = require("jsontoxml");
-var moment = require('moment');
+var moment = require("moment");
 
 const app = express();
 
 const soapRequest = require("easy-soap-request");
 const fs = require("fs");
+
+mongoose
+  .connect(
+    "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew?retryWrites=true"
+  )
+  .then(() => {
+    console.log("Conexión a base de datos exitosa");
+  })
+  .catch(() => {
+    console.log("Fallo conexión a la base de datos");
+  });
 
 //Credenciales
 //user: grupo_nro3
@@ -17,7 +30,6 @@ const url =
   "http://rubenromero-001-site1.itempurl.com/WCFReservaVehiculos.svc/basic";
 
 app.use(bodyParser.json());
-
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -41,10 +53,17 @@ app.get("/paises", (req, res, next) => {
     "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
   };
 
-  const xml = fs.readFileSync(
-    "C:/Users/Administrador/Downloads/UTN/Repo IAEW/tpi_turicor_grupo3/tpiaew/backend/test.xml",
-    "utf-8"
-  );
+  const xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb" xmlns:tem="http://tempuri.org/">
+  <soapenv:Header>
+     <Credentials>
+        <ser:UserName>grupo_nro3</ser:UserName>
+        <ser:Password>wGcs2tsBe5</ser:Password>
+     </Credentials>
+  </soapenv:Header>
+  <soapenv:Body>
+     <tem:ConsultarPaises/>
+  </soapenv:Body>
+</soapenv:Envelope>`;
 
   (async () => {
     try {
@@ -91,8 +110,7 @@ app.get("/ciudades", (req, res, next) => {
 
   const xmlbody = jsonxml(requestBodySoap);
 
-  const primeraParteXML =
-  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
   xmlns:tem="http://tempuri.org/"
   xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
@@ -128,29 +146,30 @@ app.get("/ciudades", (req, res, next) => {
 });
 
 //Consultar vehiculos disponibles
-app.get("/vehiculosDisponibles", (req, res, next) =>{
+app.get("/vehiculosDisponibles", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
-    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ConsultarVehiculosDisponibles",
+    SOAPAction:
+      "http://tempuri.org/IWCFReservaVehiculos/ConsultarVehiculosDisponibles",
     Host: "rubenromero-001-site1.itempurl.com",
     "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
   };
 
-  const idCiudad= req.query.idCiudad;
-  const fechaRetiro= req.query.fechaRetiro;
-  const fechaDevolucion= req.query.fechaDevolucion;
+  const idCiudad = req.query.idCiudad;
+  const fechaRetiro = req.query.fechaRetiro;
+  const fechaDevolucion = req.query.fechaDevolucion;
 
   moment().format("YYYY-MM-DD-HH:mm");
-  const fechaRetiroMoment= moment(fechaRetiro, "YYYY-MM-DD-HH:mm");
-  const fechaDevolucionMoment= moment(fechaDevolucion, "YYYY-MM-DD-HH:mm");
+  const fechaRetiroMoment = moment(fechaRetiro, "YYYY-MM-DD-HH:mm");
+  const fechaDevolucionMoment = moment(fechaDevolucion, "YYYY-MM-DD-HH:mm");
 
-  const duration = moment.duration(fechaDevolucionMoment.diff(fechaRetiroMoment));
-  var diferenciaEnDias =duration.as('days');
-  diferenciaEnDias= Math.round(diferenciaEnDias);
+  const duration = moment.duration(
+    fechaDevolucionMoment.diff(fechaRetiroMoment)
+  );
+  var diferenciaEnDias = duration.as("days");
+  diferenciaEnDias = Math.round(diferenciaEnDias);
 
-
-  const primeraParteXML =
-  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
   xmlns:tem="http://tempuri.org/"
   xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
@@ -165,29 +184,29 @@ app.get("/vehiculosDisponibles", (req, res, next) =>{
 
   const requestBodySoap = {
     "soapenv:Body": {
-    "tem:ConsultarVehiculosDisponibles": {
-      "tem:ConsultarVehiculosRequest": {
-        "wcf:IdCiudad": "",
-        "wcf:FechaHoraRetiro": "",
-        "wcf:FechaHoraDevolucion": ""
+      "tem:ConsultarVehiculosDisponibles": {
+        "tem:ConsultarVehiculosRequest": {
+          "wcf:IdCiudad": "",
+          "wcf:FechaHoraRetiro": "",
+          "wcf:FechaHoraDevolucion": ""
+        }
       }
     }
-  }
-};
+  };
 
-requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
-  "tem:ConsultarVehiculosRequest"
-]["wcf:IdCiudad"] = idCiudad;
-requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
-  "tem:ConsultarVehiculosRequest"
-]["wcf:FechaHoraRetiro"] = fechaRetiro;
-requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
-  "tem:ConsultarVehiculosRequest"
-]["wcf:FechaHoraDevolucion"] = fechaDevolucion;
+  requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+    "tem:ConsultarVehiculosRequest"
+  ]["wcf:IdCiudad"] = idCiudad;
+  requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+    "tem:ConsultarVehiculosRequest"
+  ]["wcf:FechaHoraRetiro"] = fechaRetiro;
+  requestBodySoap["soapenv:Body"]["tem:ConsultarVehiculosDisponibles"][
+    "tem:ConsultarVehiculosRequest"
+  ]["wcf:FechaHoraDevolucion"] = fechaDevolucion;
 
-const xmlbody = jsonxml(requestBodySoap);
+  const xmlbody = jsonxml(requestBodySoap);
 
-const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
+  const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
 
   (async () => {
     try {
@@ -198,12 +217,15 @@ const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
 
       const vehiculosvector =
         parseado["s:Envelope"]["s:Body"].ConsultarVehiculosDisponiblesResponse
-        .ConsultarVehiculosDisponiblesResult["a:VehiculosEncontrados"]["a:VehiculoModel"];
+          .ConsultarVehiculosDisponiblesResult["a:VehiculosEncontrados"][
+          "a:VehiculoModel"
+        ];
 
-        vehiculosvector.forEach(vehiculo => {
-          vehiculo.precioDeVenta=(vehiculo["a:PrecioPorDia"]*1.2)*diferenciaEnDias;
-        });
-        console.dir(vehiculosvector);
+      vehiculosvector.forEach(vehiculo => {
+        vehiculo.precioDeVenta =
+          vehiculo["a:PrecioPorDia"] * 1.2 * diferenciaEnDias;
+      });
+      console.dir(vehiculosvector);
       res.status(200).json({
         vehiculos: vehiculosvector
       });
@@ -214,8 +236,7 @@ const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
   })();
 });
 
-app.post("/reservar",(req, res, next) => {
-
+app.post("/reservar", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
     SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ReservarVehiculo",
@@ -223,8 +244,7 @@ app.post("/reservar",(req, res, next) => {
     "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
   };
 
-  const primeraParteXML =
-  `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
   xmlns:tem="http://tempuri.org/"
   xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
@@ -237,19 +257,21 @@ app.post("/reservar",(req, res, next) => {
 
   const ultimaParteXML = `</soapenv:Envelope>`;
 
-  const requestBodySoap= {"soapenv:Body": {
-    "tem:ReservarVehiculo": {
-      "tem:ReservarVehiculoRequest": {
-        "wcf:ApellidoNombreCliente": "", // string
-        "wcf:FechaHoraDevolucion": "", // Tipo: Datetime
-        "wcf:FechaHoraRetiro": "", // Tipo:Datetime
-        "wcf:IdVehiculoCiudad": "", // Tipo: number
-        "wcf:LugarDevolucion": "", // Tipo: LugarDevolucion
-        "wcf:LugarRetiro": "", // Tipo: LugarRetiro
-        "wcf:NroDocumentoCliente": "" // Tipo: number
+  const requestBodySoap = {
+    "soapenv:Body": {
+      "tem:ReservarVehiculo": {
+        "tem:ReservarVehiculoRequest": {
+          "wcf:ApellidoNombreCliente": "", // string
+          "wcf:FechaHoraDevolucion": "", // Tipo: Datetime
+          "wcf:FechaHoraRetiro": "", // Tipo:Datetime
+          "wcf:IdVehiculoCiudad": "", // Tipo: number
+          "wcf:LugarDevolucion": "", // Tipo: LugarDevolucion
+          "wcf:LugarRetiro": "", // Tipo: LugarRetiro
+          "wcf:NroDocumentoCliente": "" // Tipo: number
+        }
       }
     }
-  }}
+  };
 
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
@@ -273,6 +295,10 @@ app.post("/reservar",(req, res, next) => {
     "tem:ReservarVehiculoRequest"
   ]["wcf:NroDocumentoCliente"] = req.body.nroDocumento;
 
+  console.log("fRetiro " + req.body.fechaRetiro);
+  console.log("fDevoluc " + req.body.fechaDevolucion);
+  console.log("idVehiculoCiudad " + req.body.idVehiculoCiudad);
+
   const xmlbody = jsonxml(requestBodySoap);
 
   const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
@@ -284,9 +310,25 @@ app.post("/reservar",(req, res, next) => {
 
       const parseado = parser.parse(body);
 
-      const datosReserva =
+      const fechaRetiroMoment = moment(fechaRetiro, "YYYY-MM-DD-HH:mm");
+      const fechaDevolucionMoment = moment(fechaDevolucion, "YYYY-MM-DD-HH:mm");
+
+      const duration = moment.duration(
+        fechaDevolucionMoment.diff(fechaRetiroMoment)
+      );
+      var diferenciaEnDias = duration.as("days");
+      diferenciaEnDias = Math.round(diferenciaEnDias);
+
+      var datosReserva =
         parseado["s:Envelope"]["s:Body"].ReservarVehiculoResponse
-        .ReservarVehiculoResult["a:Reserva"];
+          .ReservarVehiculoResult["a:Reserva"];
+      //Calculamos el precio de venta para al reserva. Agregamos el campo.
+      datosReserva.precioDeVenta =
+        datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculosEntity"][
+          "b:PrecioPorDia"
+        ] *
+        1.2 *
+        diferenciaEnDias;
 
       res.status(201).json({
         respuesta: datosReserva
@@ -296,6 +338,22 @@ app.post("/reservar",(req, res, next) => {
       console.log(e);
     }
   })();
+});
+
+app.post("/registrar-reserva", (req, res, next) => {
+  const reserva = new Reserva({
+    codigoReserva: req.body.reservamongo.codigoReserva,
+    fechaReserva: req.body.reservamongo.fechaReserva,
+    idCliente: req.body.reservamongo.idCliente,
+    costo: req.body.reservamongo.costo,
+    precioVenta: req.body.reservamongo.precioVenta
+  });
+
+  reserva.save().then(()=> {
+    res.status(201).json({
+      message: "Reserva registrado correctamente!"
+    });
+  });;
 });
 
 module.exports = app;
