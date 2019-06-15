@@ -1,8 +1,8 @@
 const express = require("express");
 const bodyParser = require('body-parser');
-//const parser = require('xml2json-light');
 const parser = require("fast-xml-parser");
 var jsonxml = require("jsontoxml");
+var moment = require('moment');
 
 const app = express();
 
@@ -18,7 +18,6 @@ const url =
 
 app.use(bodyParser.json());
 
-//app.use(xmlparser());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -49,7 +48,6 @@ app.get("/paises", (req, res, next) => {
 
   (async () => {
     try {
-      console.log("Intentando");
       const { response } = await soapRequest(url, headers, xml, 1000);
       const { body } = response;
       const parseado = parser.parse(body);
@@ -115,7 +113,6 @@ app.get("/ciudades", (req, res, next) => {
       const { body } = response;
 
       const parseado = parser.parse(body);
-      // console.dir(parseado);
       const ciudadesvector =
         parseado["s:Envelope"]["s:Body"].ConsultarCiudadesResponse
           .ConsultarCiudadesResult["a:Ciudades"]["b:CiudadEntity"];
@@ -142,6 +139,15 @@ app.get("/vehiculosDisponibles", (req, res, next) =>{
   const idCiudad= req.query.idCiudad;
   const fechaRetiro= req.query.fechaRetiro;
   const fechaDevolucion= req.query.fechaDevolucion;
+
+  moment().format("YYYY-MM-DD-HH:mm");
+  const fechaRetiroMoment= moment(fechaRetiro, "YYYY-MM-DD-HH:mm");
+  const fechaDevolucionMoment= moment(fechaDevolucion, "YYYY-MM-DD-HH:mm");
+
+  const duration = moment.duration(fechaDevolucionMoment.diff(fechaRetiroMoment));
+  var diferenciaEnDias =duration.as('days');
+  diferenciaEnDias= Math.round(diferenciaEnDias);
+
 
   const primeraParteXML =
   `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
@@ -194,6 +200,10 @@ const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
         parseado["s:Envelope"]["s:Body"].ConsultarVehiculosDisponiblesResponse
         .ConsultarVehiculosDisponiblesResult["a:VehiculosEncontrados"]["a:VehiculoModel"];
 
+        vehiculosvector.forEach(vehiculo => {
+          vehiculo.precioDeVenta=(vehiculo["a:PrecioPorDia"]*1.2)*diferenciaEnDias;
+        });
+        console.dir(vehiculosvector);
       res.status(200).json({
         vehiculos: vehiculosvector
       });
@@ -244,36 +254,28 @@ app.post("/reservar",(req, res, next) => {
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:ApellidoNombreCliente"] = req.body.apellidoNombre;
-  // console.log("Nombre cliente" + req.body.apellidoNombre);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:FechaHoraDevolucion"] = req.body.fechaDevolucion;
-  // console.log("fechaDevolucion " + req.body.fechaDevolucion);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:FechaHoraRetiro"] = req.body.fechaRetiro;
-  // console.log("fechaRetiro " + req.body.fechaRetiro);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:IdVehiculoCiudad"] = req.body.idVehiculoCiudad;
-  // console.log("fechaRetiro " + req.body.idVehiculoCiudad);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:LugarDevolucion"] = req.body.lugarDevolucion;
-  // console.log("fechaRetiro " + req.body.lugarDevolucion);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:LugarRetiro"] = req.body.lugarRetiro;
-  // console.log("fechaRetiro " + req.body.lugarRetiro);
   requestBodySoap["soapenv:Body"]["tem:ReservarVehiculo"][
     "tem:ReservarVehiculoRequest"
   ]["wcf:NroDocumentoCliente"] = req.body.nroDocumento;
-  // console.log("fechaRetiro " + req.body.nroDocumento);
 
   const xmlbody = jsonxml(requestBodySoap);
 
   const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
-  // console.log(xmlSOAP);
 
   (async () => {
     try {
@@ -286,8 +288,7 @@ app.post("/reservar",(req, res, next) => {
         parseado["s:Envelope"]["s:Body"].ReservarVehiculoResponse
         .ReservarVehiculoResult["a:Reserva"];
 
-      console.dir(datosReserva);
-      res.status(200).json({
+      res.status(201).json({
         respuesta: datosReserva
       });
     } catch (e) {

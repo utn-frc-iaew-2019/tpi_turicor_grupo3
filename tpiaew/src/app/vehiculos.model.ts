@@ -10,5 +10,6 @@ export interface Vehiculo {
   "a:TieneAireAcon": boolean,
   "a:TieneDireccion": boolean,
   "a:TipoCambio": string,
-  "a:VehiculoCiudadId": number
+  "a:VehiculoCiudadId": number,
+  precioDeVenta: number;
 }

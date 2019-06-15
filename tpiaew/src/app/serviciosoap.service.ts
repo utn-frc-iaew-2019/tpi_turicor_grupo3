@@ -65,7 +65,6 @@ export class ServicioSoapService {
       }else{
         this.vehiculos= [response.vehiculos];
       }
-      this.vehiculos.forEach(vehiculo => vehiculo["a:PrecioPorDia"]=vehiculo["a:PrecioPorDia"] * 1.2);
       this.vehiculosActualizados.next([...this.vehiculos]);
     });
   }
@@ -85,10 +84,9 @@ export class ServicioSoapService {
       lugarRetiro,
       nroDocumento
       }
-      this.http.post<{reserva: any}>('http://localhost:3000/reservar',payload)
+      this.http.post<{respuesta: Reserva}>('http://localhost:3000/reservar',payload)
     .subscribe((response) => {
-      this.reserva = response.reserva;
-      console.dir(response.reserva);
+      this.reserva = response.respuesta;
       this.reservaActualizada.next(this.reserva);
     });
   }

@@ -105,6 +105,13 @@
       </td>
     </ng-container>
 
+    <ng-container matColumnDef="PrecioDeVenta">
+      <th mat-header-cell *matHeaderCellDef>PrecioDeVenta</th>
+      <td mat-cell *matCellDef="let vehiculos">
+        {{ vehiculos.precioDeVenta }}
+      </td>
+    </ng-container>
+
     <ng-container matColumnDef="Puntaje">
       <th mat-header-cell *matHeaderCellDef>Puntaje</th>
       <td mat-cell *matCellDef="let vehiculos">{{ vehiculos["a:Puntaje"] }}</td>

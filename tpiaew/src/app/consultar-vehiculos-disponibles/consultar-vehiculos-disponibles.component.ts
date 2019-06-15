@@ -25,6 +25,7 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
      "Marca",
      "Modelo",
      "PrecioPorDia",
+     "PrecioDeVenta",
      "Puntaje",
      "TieneAireAcon",
      "TieneDireccion",
@@ -63,7 +64,6 @@ export class ConsultarVehiculosDisponiblesComponent implements OnInit {
       .subscribe(vehiculosActualizados => {
         this.vehiculos = vehiculosActualizados;
       });
-      console.dir(this.vehiculos);
   }
 
   envioIdVehiculo(row){
