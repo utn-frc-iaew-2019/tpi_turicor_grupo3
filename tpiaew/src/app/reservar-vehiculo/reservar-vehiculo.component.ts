@@ -1,28 +1,29 @@
-import { Component, OnInit } from '@angular/core';
-import { ServicioSoapService } from '../serviciosoap.service';
-import { Subscription } from 'rxjs';
-import { NgForm } from '@angular/forms';
-import { Reserva } from '../reservas.model';
+import { Component, OnInit } from "@angular/core";
+import { ServicioSoapService } from "../serviciosoap.service";
+import { Subscription } from "rxjs";
+import { NgForm } from "@angular/forms";
+import { Reserva } from "../reservas.model";
+import { ReservaMongo } from "../reserva-mongo.model";
 
 @Component({
-  selector: 'app-reservar-vehiculo',
-  templateUrl: './reservar-vehiculo.component.html',
-  styleUrls: ['./reservar-vehiculo.component.css']
+  selector: "app-reservar-vehiculo",
+  templateUrl: "./reservar-vehiculo.component.html",
+  styleUrls: ["./reservar-vehiculo.component.css"]
 })
 export class ReservarVehiculoComponent implements OnInit {
-
   suscripcion: Subscription;
   idVehiculoCiudad: number;
   detalleReserva: Reserva;
-  hayReserva: boolean=false;
+  hayReserva: boolean = false;
+  reservaMongo: ReservaMongo;
 
-  constructor(public servicio: ServicioSoapService) { }
+  constructor(public servicio: ServicioSoapService) {}
 
   ngOnInit() {
-    this.idVehiculoCiudad=this.servicio.getIdVehiculoCiudad();
+    this.idVehiculoCiudad = this.servicio.getIdVehiculoCiudad();
   }
 
-  onReserva(form: NgForm){
+  onReserva(form: NgForm) {
     this.servicio.reservarVehiculo(
       form.value.apellidoNombre,
       form.value.fechaDevolucion,
@@ -30,10 +31,14 @@ export class ReservarVehiculoComponent implements OnInit {
       this.idVehiculoCiudad,
       form.value.lugarDevolucion,
       form.value.lugarRetiro,
-      form.value.nroDocumento);
-    this.servicio.getReservaListener().subscribe(detalleReserva =>{
-        this.hayReserva=true;
-        this.detalleReserva=detalleReserva;
-      });
+      form.value.nroDocumento
+    );
+    this.servicio.getReservaListener().subscribe(detalleReserva => {
+      this.detalleReserva = detalleReserva;
+    });
+    this.servicio.getReservaMongoListener().subscribe(reservamongo => {
+      this.reservaMongo = reservamongo;
+      this.hayReserva = true;
+    });
   }
 }

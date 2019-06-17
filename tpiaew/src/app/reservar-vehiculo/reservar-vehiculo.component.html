@@ -76,9 +76,9 @@
   </form>
 </mat-card>
 <mat-card *ngIf="hayReserva">
-  <p>Codigo Reserva {{detalleReserva["b:CodigoReserva"]}}</p>
-  <p>Fecha Reserva {{detalleReserva["b:FechaReserva"]}}</p>
-  <p>Id Cliente ---</p>
-  <p>Costo ---</p>
-  <p>Precio de venta ---</p>
+  <p>Codigo Reserva {{reservaMongo.codigoReserva}}</p>
+  <p>Fecha Reserva {{reservaMongo.fechaReserva}}</p>
+  <p>Id Cliente {{reservaMongo.idCliente}}</p>
+  <p>Costo {{reservaMongo.costo}}</p>
+  <p>Precio de venta {{reservaMongo.precioVenta}}</p>
 </mat-card>

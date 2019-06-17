@@ -15,12 +15,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo.component';
+import { ListarReservasComponent } from './listar-reservas/listar-reservas.component';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 @NgModule({
   declarations: [
     AppComponent,
     ConsultarVehiculosDisponiblesComponent,
-    ReservarVehiculoComponent
+    ReservarVehiculoComponent,
+    ListarReservasComponent
   ],
   imports: [
     BrowserModule,
@@ -33,7 +36,8 @@ import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo
     MatFormFieldModule,
     MatTableModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    MatExpansionModule
   ],
   providers: [],
   bootstrap: [AppComponent]

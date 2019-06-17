@@ -13,7 +13,8 @@ const fs = require("fs");
 
 mongoose
   .connect(
-    "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew?retryWrites=true"
+    // "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true"
+    "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true&w=majority"
   )
   .then(() => {
     console.log("Conexión a base de datos exitosa");
@@ -225,7 +226,6 @@ app.get("/vehiculosDisponibles", (req, res, next) => {
         vehiculo.precioDeVenta =
           vehiculo["a:PrecioPorDia"] * 1.2 * diferenciaEnDias;
       });
-      console.dir(vehiculosvector);
       res.status(200).json({
         vehiculos: vehiculosvector
       });
@@ -244,16 +244,7 @@ app.post("/reservar", (req, res, next) => {
     "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
   };
 
-  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb"
-  xmlns:tem="http://tempuri.org/"
-  xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities">
- <soapenv:Header>
-    <Credentials>
-       <ser:UserName>grupo_nro3</ser:UserName>
-       <ser:Password>wGcs2tsBe5</ser:Password>
-    </Credentials>
- </soapenv:Header>`;
+  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb" xmlns:tem="http://tempuri.org/" xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities"> <soapenv:Header> <Credentials> <ser:UserName>grupo_nro3</ser:UserName> <ser:Password>wGcs2tsBe5</ser:Password> </Credentials> </soapenv:Header>`;
 
   const ultimaParteXML = `</soapenv:Envelope>`;
 
@@ -295,10 +286,6 @@ app.post("/reservar", (req, res, next) => {
     "tem:ReservarVehiculoRequest"
   ]["wcf:NroDocumentoCliente"] = req.body.nroDocumento;
 
-  console.log("fRetiro " + req.body.fechaRetiro);
-  console.log("fDevoluc " + req.body.fechaDevolucion);
-  console.log("idVehiculoCiudad " + req.body.idVehiculoCiudad);
-
   const xmlbody = jsonxml(requestBodySoap);
 
   const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
@@ -310,8 +297,14 @@ app.post("/reservar", (req, res, next) => {
 
       const parseado = parser.parse(body);
 
-      const fechaRetiroMoment = moment(fechaRetiro, "YYYY-MM-DD-HH:mm");
-      const fechaDevolucionMoment = moment(fechaDevolucion, "YYYY-MM-DD-HH:mm");
+      const fechaRetiroMoment = moment(
+        req.body.fechaRetiro,
+        "YYYY-MM-DD-HH:mm"
+      );
+      const fechaDevolucionMoment = moment(
+        req.body.fechaDevolucion,
+        "YYYY-MM-DD-HH:mm"
+      );
 
       const duration = moment.duration(
         fechaDevolucionMoment.diff(fechaRetiroMoment)
@@ -324,7 +317,7 @@ app.post("/reservar", (req, res, next) => {
           .ReservarVehiculoResult["a:Reserva"];
       //Calculamos el precio de venta para al reserva. Agregamos el campo.
       datosReserva.precioDeVenta =
-        datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculosEntity"][
+        datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
           "b:PrecioPorDia"
         ] *
         1.2 *
@@ -340,20 +333,20 @@ app.post("/reservar", (req, res, next) => {
   })();
 });
 
-app.post("/registrar-reserva", (req, res, next) => {
+app.post("/registrar/reserva", (req, res, next) => {
   const reserva = new Reserva({
-    codigoReserva: req.body.reservamongo.codigoReserva,
-    fechaReserva: req.body.reservamongo.fechaReserva,
-    idCliente: req.body.reservamongo.idCliente,
-    costo: req.body.reservamongo.costo,
-    precioVenta: req.body.reservamongo.precioVenta
+    codigoReserva: req.body.codigoReserva,
+    fechaReserva: req.body.fechaReserva,
+    idCliente: req.body.idCliente,
+    costo: req.body.costo,
+    precioVenta: req.body.precioVenta
   });
 
-  reserva.save().then(()=> {
+  reserva.save().then(() => {
     res.status(201).json({
       message: "Reserva registrada correctamente!"
     });
-  });;
+  });
 });
 
 module.exports = app;

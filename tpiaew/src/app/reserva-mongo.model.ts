@@ -1,5 +1,4 @@
 export interface ReservaMongo {
-  _id: string;
   codigoReserva: string;
   fechaReserva: string;
   idCliente: number;

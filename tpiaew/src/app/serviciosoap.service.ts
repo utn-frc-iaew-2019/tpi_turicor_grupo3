@@ -21,6 +21,8 @@ export class ServicioSoapService {
   reservaActualizada = new Subject<Reserva>();
   idVehiculoCiudad: number;
   idVehiculoCiudadActualizado = new Subject<number>();
+  reservamongoActualizada = new Subject<ReservaMongo>();
+  reservasCliente = new Subject<ReservaMongo[]>();
 
   constructor(public http: HttpClient) {}
 
@@ -89,6 +91,10 @@ export class ServicioSoapService {
     return this.reservaActualizada.asObservable();
   }
 
+  getReservaMongoListener() {
+    return this.reservamongoActualizada.asObservable();
+  }
+
   reservarVehiculo(
     apellidoNombre: string,
     fechaDevolucion: string,
@@ -113,13 +119,19 @@ export class ServicioSoapService {
         this.reserva = response.respuesta;
         this.reservaActualizada.next(this.reserva);
         //Creamos la reserva que vamos a guardar en nuestra base MongoDB
-        var reservamongo: ReservaMongo;
-        reservamongo.codigoReserva = this.reserva["b:CodigoReserva"];
-        reservamongo.fechaReserva = this.reserva["b:FechaReserva"];
-        reservamongo.idCliente = 1; //#completar
-        reservamongo.costo = this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"]["b:PrecioPorDia"];
-        reservamongo.precioVenta = this.reserva.precioDeVenta;
-        this.http.post("http://localhost:3000/registrar-reserva", reservamongo);
+        var reservamongo: ReservaMongo = {
+          codigoReserva: this.reserva["b:CodigoReserva"],
+          fechaReserva: this.reserva["b:FechaReserva"],
+          idCliente: 1,
+          costo: this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"]["b:PrecioPorDia"],
+          precioVenta: this.reserva.precioDeVenta
+        };
+
+        console.dir(reservamongo);
+        this.http.post<{message: string}>("http://localhost:3000/registrar/reserva", reservamongo).subscribe((response) => {
+          this.reservamongoActualizada.next(reservamongo);
+        console.log(response.message);
+        });
       });
   }
 
@@ -129,5 +141,25 @@ export class ServicioSoapService {
 
   setIdVehiculoCiudad(idVehiculoCiudad: number) {
     this.idVehiculoCiudad = idVehiculoCiudad;
+  }
+
+  getReservasClienteListener() {
+    return this.reservasCliente.asObservable();
+  }
+
+  getReservasCliente(idCliente: number) {
+    let params = new HttpParams().set("idCliente", idCliente);
+    this.http
+      .get<{ reservas: ReservaMongo[] }>("http://localhost:3000/lista/reserva", {
+        params: params
+      })
+      .subscribe(response => {
+        if (response.ciudades instanceof Array) {
+          this.ciudades = response.ciudades;
+        } else {
+          this.ciudades = [response.ciudades];
+        }
+        this.ciudadesActualizadas.next([...this.ciudades]);
+      });
   }
 }
