@@ -1,11 +1,20 @@
-<mat-accordion><mat-expansion-panel>
-  <mat-expansion-panel-header>
-    <mat-panel-title>
-    Código de reserva
-    </mat-panel-title>
-    <mat-panel-description>
+<h3>Lista de reservas</h3>
+<mat-accordion
+  ><mat-expansion-panel *ngFor="let reserva of reservas">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        Código de reserva:
+      </mat-panel-title>
+      <mat-panel-description>{{reserva.codigoReserva}}</mat-panel-description>
+    </mat-expansion-panel-header>
+    <p>Fecha de reserva: {{reserva.fechaReserva}}</p>
+    <p>ID del cliente: {{reserva.idCliente}}</p>
+    <p>Costo de la reserva: {{reserva.costo}}</p>
+    <p>Precio final de venta: {{reserva.precioVenta}}</p>
+    <button mat-raised-button color="warn" (click)="onCancelarReserva(reserva.codigoReserva)">Cancelar reserva</button>
+  </mat-expansion-panel>
+</mat-accordion>
 
-    </mat-panel-description>
-  </mat-expansion-panel-header>
-
-</mat-expansion-panel> </mat-accordion>
+<mat-card *ngIf="!hayReservas">
+  <p>No se encontraron reservas.</p>
+</mat-card>

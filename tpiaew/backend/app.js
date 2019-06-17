@@ -13,7 +13,6 @@ const fs = require("fs");
 
 mongoose
   .connect(
-    // "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true"
     "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true&w=majority"
   )
   .then(() => {
@@ -347,6 +346,63 @@ app.post("/registrar/reserva", (req, res, next) => {
       message: "Reserva registrada correctamente!"
     });
   });
+});
+
+app.get("/lista/reserva", (req, res, next) => {
+  const idcliente = req.query.idCliente;
+  Reserva.find({ idCliente: idcliente })
+    .then(documents => {
+      res.status(200).json({ reservas: documents });
+    })
+    .catch( e => console.log(e));
+});
+
+app.delete("/cancelar/reserva", (req, res, next) => {
+  const codigoReserva = req.query.codigoReserva;
+  Reserva.deleteOne({ codigoReserva: codigoReserva })
+    .then( () => {
+      res.status(200).json({ message: "Reserva cancelada correctamente!" });
+    })
+    .catch( e => console.log(e));
+});
+
+app.post("/cancelar", (req, res, next) => {
+  const headers = {
+    "Content-Type": "text/xml;charset=UTF-8",
+    SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/CancelarReserva",
+    Host: "rubenromero-001-site1.itempurl.com",
+    "User-Agent": "Apache-HttpClient/4.1.1 (java 1.5)"
+  };
+
+  const primeraParteXML = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ser="http://schemas.datacontract.org/2004/07/ServicioWeb" xmlns:tem="http://tempuri.org/" xmlns:wcf="http://schemas.datacontract.org/2004/07/WCFReservaVehiculos.Business.Entities"> <soapenv:Header> <Credentials> <ser:UserName>grupo_nro3</ser:UserName> <ser:Password>wGcs2tsBe5</ser:Password> </Credentials> </soapenv:Header>`;
+
+  const ultimaParteXML = `</soapenv:Envelope>`;
+
+  const requestBodySoap = {"soapenv:Body": {
+    "tem:CancelarReserva": {
+      "tem:CancelarReservaRequest": { "wcf:CodigoReserva": "" }
+    }
+  }};
+
+  requestBodySoap["soapenv:Body"]["tem:CancelarReserva"]["tem:CancelarReservaRequest"]["wcf:CodigoReserva"] = req.body.codigoReserva;
+
+  const xmlbody = jsonxml(requestBodySoap);
+  const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
+
+  (async () => {
+    try {
+      const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
+      const { body } = response;
+      const parseado = parser.parse(body);
+      res.status(201).json(
+        {message: "Reserva cancelada en el servicio SAOP."}
+      );
+    } catch (e) {
+      // Test promise rejection for coverage
+      console.log(e);
+    }
+  })();
+
 });
 
 module.exports = app;

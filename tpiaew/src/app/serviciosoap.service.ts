@@ -5,7 +5,7 @@ import { Pais } from "./paises.model";
 import { Ciudad } from "./ciudades.model";
 import { Vehiculo } from "./vehiculos.model";
 import { Reserva } from "./reservas.model";
-import { ReservaMongo } from './reserva-mongo.model';
+import { ReservaMongo } from "./reserva-mongo.model";
 
 @Injectable({
   providedIn: "root"
@@ -22,7 +22,8 @@ export class ServicioSoapService {
   idVehiculoCiudad: number;
   idVehiculoCiudadActualizado = new Subject<number>();
   reservamongoActualizada = new Subject<ReservaMongo>();
-  reservasCliente = new Subject<ReservaMongo[]>();
+  reservasCliente: ReservaMongo[];
+  reservasClienteActualizadas = new Subject<ReservaMongo[]>();
 
   constructor(public http: HttpClient) {}
 
@@ -123,15 +124,22 @@ export class ServicioSoapService {
           codigoReserva: this.reserva["b:CodigoReserva"],
           fechaReserva: this.reserva["b:FechaReserva"],
           idCliente: 1,
-          costo: this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"]["b:PrecioPorDia"],
+          costo: this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
+            "b:PrecioPorDia"
+          ],
           precioVenta: this.reserva.precioDeVenta
         };
 
         console.dir(reservamongo);
-        this.http.post<{message: string}>("http://localhost:3000/registrar/reserva", reservamongo).subscribe((response) => {
-          this.reservamongoActualizada.next(reservamongo);
-        console.log(response.message);
-        });
+        this.http
+          .post<{ message: string }>(
+            "http://localhost:3000/registrar/reserva",
+            reservamongo
+          )
+          .subscribe(response => {
+            this.reservamongoActualizada.next(reservamongo);
+            console.log(response.message);
+          });
       });
   }
 
@@ -144,22 +152,51 @@ export class ServicioSoapService {
   }
 
   getReservasClienteListener() {
-    return this.reservasCliente.asObservable();
+    return this.reservasClienteActualizadas.asObservable();
   }
 
   getReservasCliente(idCliente: number) {
-    let params = new HttpParams().set("idCliente", idCliente);
+    let params = new HttpParams().set("idCliente", idCliente.toString());
     this.http
-      .get<{ reservas: ReservaMongo[] }>("http://localhost:3000/lista/reserva", {
+      .get<{ reservas: ReservaMongo[] }>(
+        "http://localhost:3000/lista/reserva",
+        {
+          params: params
+        }
+      )
+      .subscribe(response => {
+        if (response.reservas instanceof Array) {
+          this.reservasCliente = response.reservas;
+        } else {
+          this.reservasCliente = [response.reservas];
+        }
+        this.reservasClienteActualizadas.next([...this.reservasCliente]);
+      });
+  }
+
+  cancelarReserva(codigoReserva: string) {
+    this.http
+      .post<{message: string}>("http://localhost:3000/cancelar", { codigoReserva: codigoReserva })
+      .subscribe(response => {
+        console.log("cancelarReserva -> servicio");
+        console.log(response.message);
+        this.cancelarReservaMongo(codigoReserva);
+      });
+  }
+
+  cancelarReservaMongo(codigoReserva: string) {
+    console.log("cancelarReservaMongo -> servicio")
+    let params = new HttpParams().set("codigoReserva", codigoReserva);
+    this.http
+      .delete<{ message: string }>("http://localhost:3000/cancelar/reserva", {
         params: params
       })
       .subscribe(response => {
-        if (response.ciudades instanceof Array) {
-          this.ciudades = response.ciudades;
-        } else {
-          this.ciudades = [response.ciudades];
-        }
-        this.ciudadesActualizadas.next([...this.ciudades]);
+        this.reservasCliente = this.reservasCliente.filter(
+          reserva => reserva.codigoReserva != codigoReserva
+        );
+        this.reservasClienteActualizadas.next(this.reservasCliente);
+        console.log(response.message);
       });
   }
 }
