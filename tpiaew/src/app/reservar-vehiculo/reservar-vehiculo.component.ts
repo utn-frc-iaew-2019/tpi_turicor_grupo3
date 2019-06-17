@@ -2,7 +2,6 @@ import { Component, OnInit } from "@angular/core";
 import { ServicioSoapService } from "../serviciosoap.service";
 import { Subscription } from "rxjs";
 import { NgForm } from "@angular/forms";
-import { Reserva } from "../reservas.model";
 import { ReservaMongo } from "../reserva-mongo.model";
 
 @Component({
@@ -13,7 +12,6 @@ import { ReservaMongo } from "../reserva-mongo.model";
 export class ReservarVehiculoComponent implements OnInit {
   suscripcion: Subscription;
   idVehiculoCiudad: number;
-  detalleReserva: Reserva;
   hayReserva: boolean = false;
   reservaMongo: ReservaMongo;
 
@@ -33,9 +31,6 @@ export class ReservarVehiculoComponent implements OnInit {
       form.value.lugarRetiro,
       form.value.nroDocumento
     );
-    this.servicio.getReservaListener().subscribe(detalleReserva => {
-      this.detalleReserva = detalleReserva;
-    });
     this.servicio.getReservaMongoListener().subscribe(reservamongo => {
       this.reservaMongo = reservamongo;
       this.hayReserva = true;

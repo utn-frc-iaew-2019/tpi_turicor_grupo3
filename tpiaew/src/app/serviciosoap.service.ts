@@ -4,7 +4,6 @@ import { Subject } from "rxjs";
 import { Pais } from "./paises.model";
 import { Ciudad } from "./ciudades.model";
 import { Vehiculo } from "./vehiculos.model";
-import { Reserva } from "./reservas.model";
 import { ReservaMongo } from "./reserva-mongo.model";
 
 @Injectable({
@@ -17,8 +16,6 @@ export class ServicioSoapService {
   ciudadesActualizadas = new Subject<Ciudad[]>();
   vehiculos: Vehiculo[] = [];
   vehiculosActualizados = new Subject<Vehiculo[]>();
-  reserva: Reserva;
-  reservaActualizada = new Subject<Reserva>();
   idVehiculoCiudad: number;
   idVehiculoCiudadActualizado = new Subject<number>();
   reservamongoActualizada = new Subject<ReservaMongo>();
@@ -88,10 +85,6 @@ export class ServicioSoapService {
       });
   }
 
-  getReservaListener() {
-    return this.reservaActualizada.asObservable();
-  }
-
   getReservaMongoListener() {
     return this.reservamongoActualizada.asObservable();
   }
@@ -115,31 +108,10 @@ export class ServicioSoapService {
       nroDocumento
     };
     this.http
-      .post<{ respuesta: Reserva }>("http://localhost:3000/reservar", payload)
+      .post<{ message: string, reserva: ReservaMongo }>("http://localhost:3000/reservar", payload)
       .subscribe(response => {
-        this.reserva = response.respuesta;
-        this.reservaActualizada.next(this.reserva);
-        //Creamos la reserva que vamos a guardar en nuestra base MongoDB
-        var reservamongo: ReservaMongo = {
-          codigoReserva: this.reserva["b:CodigoReserva"],
-          fechaReserva: this.reserva["b:FechaReserva"],
-          idCliente: 1,
-          costo: this.reserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
-            "b:PrecioPorDia"
-          ],
-          precioVenta: this.reserva.precioDeVenta
-        };
-
-        console.dir(reservamongo);
-        this.http
-          .post<{ message: string }>(
-            "http://localhost:3000/registrar/reserva",
-            reservamongo
-          )
-          .subscribe(response => {
-            this.reservamongoActualizada.next(reservamongo);
-            console.log(response.message);
-          });
+        this.reservamongoActualizada.next(response.reserva);
+        console.log(response.message);
       });
   }
 
@@ -179,19 +151,6 @@ export class ServicioSoapService {
       .post<{message: string}>("http://localhost:3000/cancelar", { codigoReserva: codigoReserva })
       .subscribe(response => {
         console.log("cancelarReserva -> servicio");
-        console.log(response.message);
-        this.cancelarReservaMongo(codigoReserva);
-      });
-  }
-
-  cancelarReservaMongo(codigoReserva: string) {
-    console.log("cancelarReservaMongo -> servicio")
-    let params = new HttpParams().set("codigoReserva", codigoReserva);
-    this.http
-      .delete<{ message: string }>("http://localhost:3000/cancelar/reserva", {
-        params: params
-      })
-      .subscribe(response => {
         this.reservasCliente = this.reservasCliente.filter(
           reserva => reserva.codigoReserva != codigoReserva
         );

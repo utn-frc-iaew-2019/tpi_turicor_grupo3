@@ -7,9 +7,7 @@ var jsonxml = require("jsontoxml");
 var moment = require("moment");
 
 const app = express();
-
 const soapRequest = require("easy-soap-request");
-const fs = require("fs");
 
 mongoose
   .connect(
@@ -293,9 +291,7 @@ app.post("/reservar", (req, res, next) => {
     try {
       const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
       const { body } = response;
-
       const parseado = parser.parse(body);
-
       const fechaRetiroMoment = moment(
         req.body.fechaRetiro,
         "YYYY-MM-DD-HH:mm"
@@ -314,16 +310,29 @@ app.post("/reservar", (req, res, next) => {
       var datosReserva =
         parseado["s:Envelope"]["s:Body"].ReservarVehiculoResponse
           .ReservarVehiculoResult["a:Reserva"];
-      //Calculamos el precio de venta para al reserva. Agregamos el campo.
-      datosReserva.precioDeVenta =
-        datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
-          "b:PrecioPorDia"
-        ] *
-        1.2 *
-        diferenciaEnDias;
 
-      res.status(201).json({
-        respuesta: datosReserva
+      //Armamos la reserva que se almacena en la base de datos
+      var reservamongo = new Reserva({
+        codigoReserva: datosReserva["b:CodigoReserva"],
+        fechaReserva: datosReserva["b:FechaReserva"],
+        idCliente: 1,
+        costo:
+          datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
+            "b:PrecioPorDia"
+          ],
+        precioVenta:
+          datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
+            "b:PrecioPorDia"
+          ] *
+          1.2 *
+          diferenciaEnDias
+      });
+
+      reservamongo.save().then(() => {
+        res.status(201).json({
+          message: "Reserva creada exitosamente.",
+          reserva: reservamongo
+        });
       });
     } catch (e) {
       // Test promise rejection for coverage
@@ -332,38 +341,13 @@ app.post("/reservar", (req, res, next) => {
   })();
 });
 
-app.post("/registrar/reserva", (req, res, next) => {
-  const reserva = new Reserva({
-    codigoReserva: req.body.codigoReserva,
-    fechaReserva: req.body.fechaReserva,
-    idCliente: req.body.idCliente,
-    costo: req.body.costo,
-    precioVenta: req.body.precioVenta
-  });
-
-  reserva.save().then(() => {
-    res.status(201).json({
-      message: "Reserva registrada correctamente!"
-    });
-  });
-});
-
 app.get("/lista/reserva", (req, res, next) => {
   const idcliente = req.query.idCliente;
   Reserva.find({ idCliente: idcliente })
     .then(documents => {
       res.status(200).json({ reservas: documents });
     })
-    .catch( e => console.log(e));
-});
-
-app.delete("/cancelar/reserva", (req, res, next) => {
-  const codigoReserva = req.query.codigoReserva;
-  Reserva.deleteOne({ codigoReserva: codigoReserva })
-    .then( () => {
-      res.status(200).json({ message: "Reserva cancelada correctamente!" });
-    })
-    .catch( e => console.log(e));
+    .catch(e => console.log(e));
 });
 
 app.post("/cancelar", (req, res, next) => {
@@ -378,31 +362,35 @@ app.post("/cancelar", (req, res, next) => {
 
   const ultimaParteXML = `</soapenv:Envelope>`;
 
-  const requestBodySoap = {"soapenv:Body": {
-    "tem:CancelarReserva": {
-      "tem:CancelarReservaRequest": { "wcf:CodigoReserva": "" }
+  const requestBodySoap = {
+    "soapenv:Body": {
+      "tem:CancelarReserva": {
+        "tem:CancelarReservaRequest": { "wcf:CodigoReserva": "" }
+      }
     }
-  }};
+  };
 
-  requestBodySoap["soapenv:Body"]["tem:CancelarReserva"]["tem:CancelarReservaRequest"]["wcf:CodigoReserva"] = req.body.codigoReserva;
+  requestBodySoap["soapenv:Body"]["tem:CancelarReserva"][
+    "tem:CancelarReservaRequest"
+  ]["wcf:CodigoReserva"] = req.body.codigoReserva;
 
   const xmlbody = jsonxml(requestBodySoap);
   const xmlSOAP = primeraParteXML + xmlbody + ultimaParteXML;
 
   (async () => {
     try {
-      const { response } = await soapRequest(url, headers, xmlSOAP, 1000);
-      const { body } = response;
-      const parseado = parser.parse(body);
-      res.status(201).json(
-        {message: "Reserva cancelada en el servicio SAOP."}
-      );
+      await soapRequest(url, headers, xmlSOAP, 1000);
+
+      Reserva.deleteOne({ codigoReserva: req.body.codigoReserva })
+        .then(() => {
+          res.status(200).json({ message: "Reserva cancelada correctamente!" });
+        })
+        .catch(e => console.log(e));
     } catch (e) {
       // Test promise rejection for coverage
       console.log(e);
     }
   })();
-
 });
 
 module.exports = app;
