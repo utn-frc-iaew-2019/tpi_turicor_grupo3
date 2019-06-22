@@ -9,6 +9,14 @@ const passport = require('passport');
 const app = express();
 const soapRequest = require("easy-soap-request");
 
+app.use(cookieSession({
+  maxAge: 24 * 60 * 60 * 1000,
+  keys: [keys.session.cookieKey]
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 mongoose
   .connect(
     "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true&w=majority"
