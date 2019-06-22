@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const parser = require("fast-xml-parser");
 var jsonxml = require("jsontoxml");
 var moment = require("moment");
-
+const passport = require('passport');
 const app = express();
 const soapRequest = require("easy-soap-request");
 
@@ -391,6 +391,14 @@ app.post("/cancelar", (req, res, next) => {
       console.log(e);
     }
   })();
+});
+
+app.get('/oauth', passport.authenticate('google', {
+  scope: ['profile']
+}));
+
+app.get('/redirect', passport.authenticate('google'), (req, res) => {
+  res.send('you reached the redirect URI');
 });
 
 module.exports = app;

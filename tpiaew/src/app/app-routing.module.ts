@@ -3,9 +3,12 @@ import { Routes, RouterModule } from '@angular/router';
 import { ConsultarVehiculosDisponiblesComponent } from './consultar-vehiculos-disponibles/consultar-vehiculos-disponibles.component';
 import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo.component';
 import { ListarReservasComponent } from './listar-reservas/listar-reservas.component';
+import { LoginComponent } from './login/login.component';
 
 const routes: Routes = [
-  { path: '', component: ConsultarVehiculosDisponiblesComponent },
+  { path: '', component: LoginComponent },
+  // { path: 'redirect', component:  },
+  { path: 'consulta', component: ConsultarVehiculosDisponiblesComponent },
   { path: 'reserva', component: ReservarVehiculoComponent },
   { path: 'lista/reserva', component: ListarReservasComponent },
 

@@ -17,13 +17,17 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo.component';
 import { ListarReservasComponent } from './listar-reservas/listar-reservas.component';
 import {MatExpansionModule} from '@angular/material/expansion';
+import { Login } from './login.component/login.component.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ConsultarVehiculosDisponiblesComponent,
     ReservarVehiculoComponent,
-    ListarReservasComponent
+    ListarReservasComponent,
+    Login.ComponentComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
