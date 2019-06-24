@@ -1,13 +1,18 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieSession = require('cookie-session');
 const Reserva = require("./models/reserva");
 const bodyParser = require("body-parser");
 const parser = require("fast-xml-parser");
 var jsonxml = require("jsontoxml");
 var moment = require("moment");
 const passport = require('passport');
+const passportSetup = require('./passport-setup');
 const app = express();
 const soapRequest = require("easy-soap-request");
+const keys = require("./keys");
+const Cliente = require("./models/cliente");
+var idUltimoCliente;
 
 app.use(cookieSession({
   maxAge: 24 * 60 * 60 * 1000,
@@ -19,7 +24,8 @@ app.use(passport.session());
 
 mongoose
   .connect(
-    "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true&w=majority"
+    "mongodb+srv://ComandanteJr:SNcjNuPBMG42lOh1@cluster0-qvosw.mongodb.net/iaew-tp?retryWrites=true&w=majority",
+    { useNewUrlParser: true }
   )
   .then(() => {
     console.log("Conexión a base de datos exitosa");
@@ -36,6 +42,8 @@ const url =
   "http://rubenromero-001-site1.itempurl.com/WCFReservaVehiculos.svc/basic";
 
 app.use(bodyParser.json());
+
+// app.use(cors());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -315,6 +323,10 @@ app.post("/reservar", (req, res, next) => {
       var diferenciaEnDias = duration.as("days");
       diferenciaEnDias = Math.round(diferenciaEnDias);
 
+      if(diferenciaEnDias == 0){
+        diferenciaEnDias = 1;
+      }
+
       var datosReserva =
         parseado["s:Envelope"]["s:Body"].ReservarVehiculoResponse
           .ReservarVehiculoResult["a:Reserva"];
@@ -406,7 +418,15 @@ app.get('/oauth', passport.authenticate('google', {
 }));
 
 app.get('/redirect', passport.authenticate('google'), (req, res) => {
-  res.send('you reached the redirect URI');
+  // Cliente.find({id : req.user.id }).then(cliente => {
+  // res.status(200).json({cliente : cliente});} )
+  idUltimoCliente = req.user.id;
+  res.redirect("http://localhost:4200/menu");
+});
+
+app.get("/cliente", (req, res, next) => {
+Cliente.findOne({id : idUltimoCliente }).then(cliente => {
+  res.status(200).json({cliente : cliente});} )
 });
 
 module.exports = app;

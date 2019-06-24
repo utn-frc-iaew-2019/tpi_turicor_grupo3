@@ -8,7 +8,7 @@ passport.serializeUser((cliente, done) => {
 });
 
 passport.deserializeUser((id, done) => {
-  Cliente.findById(id).then(cliente => {
+  Cliente.find({id : id}).then(cliente => {
     done(null, cliente);
   });
 });
@@ -28,8 +28,8 @@ passport.use(
         } else {
           new Cliente({
             id: profile.id,
-            nombre: profile.name,
-            // documento: profile.
+            nombre: profile.name.givenName,
+            apellido: profile.name.familyName
           })
             .save()
             .then(nuevoUsuario => {

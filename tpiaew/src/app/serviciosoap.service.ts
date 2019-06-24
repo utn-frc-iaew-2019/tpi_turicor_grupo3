@@ -5,6 +5,7 @@ import { Pais } from "./paises.model";
 import { Ciudad } from "./ciudades.model";
 import { Vehiculo } from "./vehiculos.model";
 import { ReservaMongo } from "./reserva-mongo.model";
+import { Cliente } from "./clientes.model";
 
 @Injectable({
   providedIn: "root"
@@ -21,11 +22,17 @@ export class ServicioSoapService {
   reservamongoActualizada = new Subject<ReservaMongo>();
   reservasCliente: ReservaMongo[];
   reservasClienteActualizadas = new Subject<ReservaMongo[]>();
+  clienteActualizado = new Subject<Cliente>();
+  cliente: Cliente;
 
   constructor(public http: HttpClient) {}
 
   getPaisesListener() {
     return this.paisesActualizados.asObservable();
+  }
+
+  getClienteListener() {
+    return this.clienteActualizado.asObservable();
   }
 
   getPaises() {
@@ -108,7 +115,10 @@ export class ServicioSoapService {
       nroDocumento
     };
     this.http
-      .post<{ message: string, reserva: ReservaMongo }>("http://localhost:3000/reservar", payload)
+      .post<{ message: string; reserva: ReservaMongo }>(
+        "http://localhost:3000/reservar",
+        payload
+      )
       .subscribe(response => {
         this.reservamongoActualizada.next(response.reserva);
         console.log(response.message);
@@ -148,7 +158,9 @@ export class ServicioSoapService {
 
   cancelarReserva(codigoReserva: string) {
     this.http
-      .post<{message: string}>("http://localhost:3000/cancelar", { codigoReserva: codigoReserva })
+      .post<{ message: string }>("http://localhost:3000/cancelar", {
+        codigoReserva: codigoReserva
+      })
       .subscribe(response => {
         console.log("cancelarReserva -> servicio");
         this.reservasCliente = this.reservasCliente.filter(
@@ -158,4 +170,16 @@ export class ServicioSoapService {
         console.log(response.message);
       });
   }
+
+  getUsuario() {
+    this.http
+      .get<{cliente: Cliente}>("http://localhost:3000/cliente")
+      .subscribe( response => {
+        console.dir(response.cliente);
+        this.cliente = response.cliente;
+        this.clienteActualizado.next(this.cliente);
+      });
+  }
+
+
 }

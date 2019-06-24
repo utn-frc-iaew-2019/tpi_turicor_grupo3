@@ -3,6 +3,8 @@ import { ServicioSoapService } from "../serviciosoap.service";
 import { Subscription } from "rxjs";
 import { NgForm } from "@angular/forms";
 import { ReservaMongo } from "../reserva-mongo.model";
+import { Cliente } from '../clientes.model';
+
 
 @Component({
   selector: "app-reservar-vehiculo",
@@ -14,11 +16,15 @@ export class ReservarVehiculoComponent implements OnInit {
   idVehiculoCiudad: number;
   hayReserva: boolean = false;
   reservaMongo: ReservaMongo;
+  apellidoNombreUsuario: String;
+  cliente: Cliente;
 
   constructor(public servicio: ServicioSoapService) {}
 
   ngOnInit() {
     this.idVehiculoCiudad = this.servicio.getIdVehiculoCiudad();
+    this.apellidoNombreUsuario =  this.servicio.cliente.nombre + " " + this.servicio.cliente.apellido ;
+
   }
 
   onReserva(form: NgForm) {

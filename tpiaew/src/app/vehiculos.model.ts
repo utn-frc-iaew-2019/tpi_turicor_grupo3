@@ -7,8 +7,8 @@ export interface Vehiculo {
   "a:Modelo": string,
   "a:PrecioPorDia":number,
   "a:Puntaje":number,
-  "a:TieneAireAcon": boolean,
-  "a:TieneDireccion": boolean,
+  "a:TieneAireAcon": any,
+  "a:TieneDireccion": any,
   "a:TipoCambio": string,
   "a:VehiculoCiudadId": number,
   precioDeVenta: number;

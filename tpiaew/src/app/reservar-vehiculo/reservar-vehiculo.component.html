@@ -1,3 +1,4 @@
+<h2>Reservar vehículo</h2>
 <mat-card>
   <form #form="ngForm" (submit)="onReserva(form)">
       <mat-form-field>
@@ -6,8 +7,22 @@
             ngModel
             #apellidoNombre="ngModel"
             matInput
-            placeholder="Ingrese apellido y nombre"
+            [(ngModel)]="apellidoNombreUsuario"
+            disabled = "true"
+            placeholder="Nombre y apellido cliente: "
           />
+
+      </mat-form-field>
+      <br />
+
+      <mat-form-field>
+        <input
+          name="fechaRetiro"
+          ngModel
+          #fechaRetiro="ngModel"
+          matInput
+          placeholder="Ingrese fecha retiro (AAAA-MM-DD-hh:mm)"
+        />
       </mat-form-field>
       <br />
       <mat-form-field>
@@ -16,23 +31,11 @@
             ngModel
             #fechaDevolucion="ngModel"
             matInput
-            placeholder="Ingrese fecha devolucion"
+            placeholder="Ingrese fecha devolución (AAAA-MM-DD-hh:mm)"
           />
         </mat-form-field>
         <br />
-      <mat-form-field>
-        <input
-          name="fechaRetiro"
-          ngModel
-          #fechaRetiro="ngModel"
-          matInput
-          placeholder="Ingrese fecha retiro"
-        />
-      </mat-form-field>
-      <br />
-      <mat-card>Id Vehiculo Ciudad: {{idVehiculoCiudad}}</mat-card>
 
-        <br />
     <mat-form-field>
       <mat-select
         placeholder="Seleccione Lugar de Devolucion"
@@ -76,9 +79,8 @@
   </form>
 </mat-card>
 <mat-card *ngIf="hayReserva">
-  <p>Codigo Reserva {{reservaMongo.codigoReserva}}</p>
-  <p>Fecha Reserva {{reservaMongo.fechaReserva}}</p>
-  <p>Id Cliente {{reservaMongo.idCliente}}</p>
-  <p>Costo {{reservaMongo.costo}}</p>
-  <p>Precio de venta {{reservaMongo.precioVenta}}</p>
+  <p>Código Reserva: {{reservaMongo.codigoReserva}}</p>
+  <p>Fecha Reserva: {{reservaMongo.fechaReserva}}</p>
+  <p>Costo: {{reservaMongo.costo}}</p>
+  <p>Precio de venta: {{reservaMongo.precioVenta}}</p>
 </mat-card>

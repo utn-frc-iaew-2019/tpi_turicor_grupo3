@@ -4,10 +4,11 @@ import { ConsultarVehiculosDisponiblesComponent } from './consultar-vehiculos-di
 import { ReservarVehiculoComponent } from './reservar-vehiculo/reservar-vehiculo.component';
 import { ListarReservasComponent } from './listar-reservas/listar-reservas.component';
 import { LoginComponent } from './login/login.component';
+import { MenuComponent } from './menu/menu.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent },
-  // { path: 'redirect', component:  },
+  { path: 'menu', component: MenuComponent  },
   { path: 'consulta', component: ConsultarVehiculosDisponiblesComponent },
   { path: 'reserva', component: ReservarVehiculoComponent },
   { path: 'lista/reserva', component: ListarReservasComponent },
