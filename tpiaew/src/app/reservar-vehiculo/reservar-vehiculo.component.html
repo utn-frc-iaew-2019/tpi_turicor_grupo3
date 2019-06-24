@@ -1,4 +1,4 @@
-<h2>Reservar vehículo</h2>
+<h3>Reservar vehículo</h3>
 <mat-card>
   <form #form="ngForm" (submit)="onReserva(form)">
       <mat-form-field>
@@ -76,9 +76,11 @@
     <br />
 
     <button type="submit" mat-raised-button color="primary">Reservar</button>
+    <button mat-raised-button color="primary" routerLink="/menu"> Volver al menú principal </button>
   </form>
 </mat-card>
 <mat-card *ngIf="hayReserva">
+  <p>Reserva exitosamente guardada</p>
   <p>Código Reserva: {{reservaMongo.codigoReserva}}</p>
   <p>Fecha Reserva: {{reservaMongo.fechaReserva}}</p>
   <p>Costo: {{reservaMongo.costo}}</p>

@@ -1,6 +1,7 @@
 <div>
-    <p *ngIf="cliente">{{cliente.nombre}}</p>
-    <a mat-raised-button color="primary" routerLink="/consulta">Consultar vehiculos disponibles</a><br>
-    <a mat-raised-button color="primary" routerLink="/reserva">Reservar un vehiculo</a><br>
-    <a mat-raised-button color="primary" routerLink="/lista/reserva">Consultar la lista de reservas</a><br>
+    <h3 *ngIf="cliente">Bienvenido, {{cliente.nombre}}!</h3>
+    <mat-card>
+      <a mat-raised-button color="primary" routerLink="/consulta">Consultar vehiculos disponibles</a><br>
+      <a mat-raised-button color="primary" routerLink="/lista/reserva">Consultar la lista de reservas</a><br>
+    </mat-card>
 </div>

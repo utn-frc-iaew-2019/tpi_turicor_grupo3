@@ -1,4 +1,4 @@
-<h3>Lista de reservas</h3>
+<h3>Lista de reservas del cliente: {{nombreApellidoCliente}}</h3>
 <mat-accordion
   ><mat-expansion-panel *ngFor="let reserva of reservas">
     <mat-expansion-panel-header>
@@ -8,13 +8,12 @@
       <mat-panel-description>{{reserva.codigoReserva}}</mat-panel-description>
     </mat-expansion-panel-header>
     <p>Fecha de reserva: {{reserva.fechaReserva}}</p>
-    <p>ID del cliente: {{reserva.idCliente}}</p>
     <p>Costo de la reserva: {{reserva.costo}}</p>
     <p>Precio final de venta: {{reserva.precioVenta}}</p>
     <button mat-raised-button color="warn" (click)="onCancelarReserva(reserva.codigoReserva)">Cancelar reserva</button>
   </mat-expansion-panel>
 </mat-accordion>
-
+<button mat-raised-button color="primary" routerLink="/menu"> Volver al menú principal </button>
 <mat-card *ngIf="!hayReservas">
   <p>No se encontraron reservas.</p>
 </mat-card>

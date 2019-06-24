@@ -1,4 +1,4 @@
-<h2>Consultar vehículos disponibles</h2>
+<h3>Consultar vehículos disponibles</h3>
 <mat-card>
   <form #form="ngForm" (submit)="onBuscar(form)">
     <mat-form-field>
@@ -57,6 +57,7 @@
     </mat-form-field>
     <br />
     <button type="submit" mat-raised-button color="primary">Buscar</button>
+    <button mat-raised-button color="primary" routerLink="/menu"> Volver al menú principal </button>
   </form>
 </mat-card>
 
@@ -143,3 +144,4 @@
 <mat-card *ngIf="vehiculos.length <= 0">
   <p>No se encontraron vehiculos</p>
 </mat-card>
+

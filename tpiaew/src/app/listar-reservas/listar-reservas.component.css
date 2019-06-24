@@ -2,6 +2,11 @@ mat-expansion-panel{
   margin: 2rem;
 }
 
+button{
+  margin: 1rem;
+  align-self: center;
+}
+
 h3{
   text-align: center;
 }

@@ -10,11 +10,12 @@ import { ReservaMongo } from '../reserva-mongo.model';
 export class ListarReservasComponent implements OnInit {
 reservas: ReservaMongo[];
 hayReservas: boolean = false;
-idCliente: number; //Falta completar los comportamientos de cliente
+nombreApellidoCliente: string;
   constructor(public servicio: ServicioSoapService) { }
 
   ngOnInit() {
     this.obtenerReservas();
+    this.nombreApellidoCliente = this.servicio.cliente.nombre + " " + this.servicio.cliente.apellido
   }
 
   onCancelarReserva(codigo: string){
@@ -23,9 +24,12 @@ idCliente: number; //Falta completar los comportamientos de cliente
   }
 
   obtenerReservas(){
-    this.servicio.getReservasCliente(1);
+    this.servicio.getReservasCliente();
     this.servicio.getReservasClienteListener().subscribe(reservas => {
       this.reservas = reservas;
+      this.reservas.forEach(reserva => {
+        reserva.fechaReserva = reserva.fechaReserva.slice(0,10);
+      });
       this.hayReservas = true;
     });
   }

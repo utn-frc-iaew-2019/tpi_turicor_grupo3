@@ -335,7 +335,7 @@ app.post("/reservar", (req, res, next) => {
       var reservamongo = new Reserva({
         codigoReserva: datosReserva["b:CodigoReserva"],
         fechaReserva: datosReserva["b:FechaReserva"],
-        idCliente: 1,
+        idCliente: req.body.idCliente,
         costo:
           datosReserva["b:VehiculoPorCiudadEntity"]["b:VehiculoEntity"][
             "b:PrecioPorDia"

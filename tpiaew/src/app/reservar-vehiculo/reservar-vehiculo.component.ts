@@ -16,7 +16,7 @@ export class ReservarVehiculoComponent implements OnInit {
   idVehiculoCiudad: number;
   hayReserva: boolean = false;
   reservaMongo: ReservaMongo;
-  apellidoNombreUsuario: String;
+  apellidoNombreUsuario: string;
   cliente: Cliente;
 
   constructor(public servicio: ServicioSoapService) {}
@@ -29,7 +29,7 @@ export class ReservarVehiculoComponent implements OnInit {
 
   onReserva(form: NgForm) {
     this.servicio.reservarVehiculo(
-      form.value.apellidoNombre,
+      this.apellidoNombreUsuario,
       form.value.fechaDevolucion,
       form.value.fechaRetiro,
       this.idVehiculoCiudad,
@@ -37,8 +37,9 @@ export class ReservarVehiculoComponent implements OnInit {
       form.value.lugarRetiro,
       form.value.nroDocumento
     );
-    this.servicio.getReservaMongoListener().subscribe(reservamongo => {
+    this.servicio.getReservaMongoListener().subscribe(reservamongo => { //2019-06-24T14:37:19.0040197-07:00
       this.reservaMongo = reservamongo;
+      this.reservaMongo.fechaReserva = this.reservaMongo.fechaReserva.slice(0,10);
       this.hayReserva = true;
     });
   }

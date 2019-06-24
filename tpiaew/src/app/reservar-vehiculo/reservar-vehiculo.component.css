@@ -2,6 +2,11 @@
   width: 60%;
 }
 
-h2{
+button, mat-card{
+  margin: 1rem;
+  align-self: center;
+}
+
+h3{
   text-align: center;
 }

@@ -105,6 +105,7 @@ export class ServicioSoapService {
     lugarRetiro: string,
     nroDocumento: number
   ) {
+    const idCliente = this.cliente.id;
     const payload = {
       apellidoNombre,
       fechaDevolucion,
@@ -112,7 +113,8 @@ export class ServicioSoapService {
       idVehiculoCiudad,
       lugarDevolucion,
       lugarRetiro,
-      nroDocumento
+      nroDocumento,
+      idCliente
     };
     this.http
       .post<{ message: string; reserva: ReservaMongo }>(
@@ -137,8 +139,8 @@ export class ServicioSoapService {
     return this.reservasClienteActualizadas.asObservable();
   }
 
-  getReservasCliente(idCliente: number) {
-    let params = new HttpParams().set("idCliente", idCliente.toString());
+  getReservasCliente() {
+    let params = new HttpParams().set("idCliente", this.cliente.id.toString());
     this.http
       .get<{ reservas: ReservaMongo[] }>(
         "http://localhost:3000/lista/reserva",
