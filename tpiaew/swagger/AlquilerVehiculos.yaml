@@ -72,30 +72,25 @@ paths:
       description: "Realizar la reserva de un vehiculo."
       parameters:
       - in: "body"
-        name: "apellidoNombre"
-        type: "string"
-      - in: "body"
-        name: "fechaDevolucion"
-        type: "string"
-        format: "date-time"
-      - in: "body"
-        name: "fechaRetiro"
-        type: "string"
-        format: "date-time"
-      - in: "body"
-        name: "idVehiculoCiudad"
-        type: "integer"
-        format: "int32"
-      - in: "body"
-        name: "lugarDevolucion"
-        type: "string"
-      - in: "body"
-        name: "lugarRetiro"
-        type: "string"
-      - in: "body"
-        name: "nroDocumento"
-        type: "string"
-        format: "int32"
+        name: "payload"
+        schema:
+          type: "object"
+          properties:
+            apellidoNombre:
+              type: "string"
+            fechaDevolucion:
+              type: "string"
+            fechaRetiro:
+              type: "string"
+            idVehiculoCiudad:
+              type: "number"
+            lugarDevolucionRetiro:
+              type: "string"
+            lugarRetiro:
+              type: "string"
+            nroDocumento:
+              type: "string"
+
       responses:
         201:
           description: "OK"
@@ -119,12 +114,12 @@ paths:
         200:
           description: "OK"
           schema:
-            response:
-              properties:
-                paises:
-                  type: "array"
-                  items:
-                   $ref: "#/definitions/Pais"
+            type: "object"
+            properties:
+              vehiculos:
+                type: "array"
+                items:
+                  $ref: "#/definitions/ReservaMongo"
 definitions:
     Pais:
       type: "object"
