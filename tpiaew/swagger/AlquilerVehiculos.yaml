@@ -90,7 +90,6 @@ paths:
               type: "string"
             nroDocumento:
               type: "string"
-
       responses:
         201:
           description: "OK"
@@ -120,6 +119,25 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/ReservaMongo"
+  /cancelar:
+    post:
+      description: "Cancela una reserva de un vehiculo."
+      parameters:
+      - in: "body"
+        name: "payload"
+        schema:
+          type: "object"
+          properties:
+            codigoReserva:
+              type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              message:
+                type: "string"
 definitions:
     Pais:
       type: "object"
