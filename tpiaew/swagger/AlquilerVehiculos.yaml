@@ -67,7 +67,7 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Vehiculo"
-  /reservar:
+  /reserva:
     post:
       description: "Realizar la reserva de un vehiculo."
       parameters:
@@ -100,7 +100,7 @@ paths:
                 type: "string"
               reservamongo:
                 $ref: "#/definitions/ReservaMongo"
-  /lista/reserva:
+  /reserva/lista:
     get:
       description: "Obtener las reservas de un cliente."
       parameters:
@@ -119,7 +119,7 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/ReservaMongo"
-  /cancelar:
+  /reserva/baja:
     post:
       description: "Cancela una reserva de un vehiculo."
       parameters:

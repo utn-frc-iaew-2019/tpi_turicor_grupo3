@@ -118,7 +118,7 @@ export class ServicioSoapService {
     };
     this.http
       .post<{ message: string; reserva: ReservaMongo }>(
-        "http://localhost:3000/reservar",
+        "http://localhost:3000/reserva",
         payload
       )
       .subscribe(response => {
@@ -143,7 +143,7 @@ export class ServicioSoapService {
     let params = new HttpParams().set("idCliente", this.cliente.id.toString());
     this.http
       .get<{ reservas: ReservaMongo[] }>(
-        "http://localhost:3000/lista/reserva",
+        "http://localhost:3000/reserva/lista",
         {
           params: params
         }
@@ -160,7 +160,7 @@ export class ServicioSoapService {
 
   cancelarReserva(codigoReserva: string) {
     this.http
-      .post<{ message: string }>("http://localhost:3000/cancelar", {
+      .post<{ message: string }>("http://localhost:3000/reserva/baja", {
         codigoReserva: codigoReserva
       })
       .subscribe(response => {

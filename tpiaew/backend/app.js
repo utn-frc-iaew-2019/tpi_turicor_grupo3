@@ -249,7 +249,7 @@ app.get("/vehiculosDisponibles", (req, res, next) => {
   })();
 });
 
-app.post("/reservar", (req, res, next) => {
+app.post("/reserva", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
     SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/ReservarVehiculo",
@@ -361,7 +361,7 @@ app.post("/reservar", (req, res, next) => {
   })();
 });
 
-app.get("/lista/reserva", (req, res, next) => {
+app.get("/reserva/lista", (req, res, next) => {
   const idcliente = req.query.idCliente;
   Reserva.find({ idCliente: idcliente })
     .then(documents => {
@@ -370,7 +370,7 @@ app.get("/lista/reserva", (req, res, next) => {
     .catch(e => console.log(e));
 });
 
-app.post("/cancelar", (req, res, next) => {
+app.post("/reserva/baja", (req, res, next) => {
   const headers = {
     "Content-Type": "text/xml;charset=UTF-8",
     SOAPAction: "http://tempuri.org/IWCFReservaVehiculos/CancelarReserva",
